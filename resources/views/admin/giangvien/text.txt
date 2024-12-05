@@ -1,0 +1,460 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Redirect; 
+class LichBaoVeController extends Controller
+{
+    public function list_lbv(){
+        $phong_hoc = DB::table('phong_hoc')->get();
+        $buoi_bao_ve= DB::table('buoi_bao_ve')->get();
+        return view ('admin.lichbaove.list_lichbaove',compact('buoi_bao_ve','phong_hoc'));
+    }
+    public function add_lbv()
+    {
+        // Lấy danh sách phòng học
+        $phong_hoc = DB::table('phong_hoc')->orderby('Ma_PH', 'desc')->get();
+        
+        // Lấy mã buổi bảo vệ cuối cùng từ bảng
+        $lastCode = DB::table('buoi_bao_ve')->orderBy('MA_BV', 'desc')->value('MA_BV');
+        
+        // Tạo mã buổi bảo vệ mới
+        if ($lastCode) {
+            $number = (int) filter_var($lastCode, FILTER_SANITIZE_NUMBER_INT);
+            $newCode = 'BV' . str_pad($number + 1, 2, '0', STR_PAD_LEFT);
+        } else {
+            $newCode = 'BV01';
+        }
+    
+        // Lấy danh sách sinh viên
+        $sinh_vien = DB::table('sinh_vien')->get();
+    
+        // Trả dữ liệu về view
+        return view('admin.lichbaove.add_lichbaove', [
+            'newCode' => $newCode,
+            'phong_hoc' => $phong_hoc,
+            'sinh_vien' => $sinh_vien // Truyền danh sách sinh viên vào view
+        ]);
+    }
+    
+    public function save_lbv(Request $request)
+    {
+        $data = array();
+        $data['MA_BV'] = $request->MA_BV;
+        $data['MA_PH'] = $request->MA_PH;
+        $data['GIO_BATDAU_BV'] = $request->GIO_BATDAU_BV;
+        $data['NGAY_BV'] = $request->NGAY_BV;
+        $data['THOILUONG_BV'] = count($request->sinh_vien) * 40; // Tính tổng thời lượng
+        $data['SO_LUONG_BV'] = count($request->sinh_vien);
+    
+        // Lưu thông tin vào bảng buoi_bao_ve
+        DB::table('buoi_bao_ve')->insert($data);
+    
+        // Lưu chi tiết sinh viên
+        foreach ($request->sinh_vien as $index => $ma_sv) {
+            $gio_bat_dau = date('H:i', strtotime($request->GIO_BATDAU_BV . ' +' . ($index * 40) . ' minutes'));
+            $gio_ket_thuc = date('H:i', strtotime($gio_bat_dau . ' +40 minutes'));
+    
+            DB::table('chitiet_lichbv')->insert([
+                'MA_BV' => $request->MA_BV,
+                'MA_SV' => $ma_sv,
+                'gio_bat_dau' => $gio_bat_dau,
+                'gio_ket_thuc' => $gio_ket_thuc
+            ]);
+        }
+    
+        return redirect()->route('lichbaove.list_lbv')->with('thongbao', 'Thêm lịch bảo vệ thành công!');
+    }
+    
+
+}
+
+
+
+
+@extends('admin-layout')
+@section('admin_content')
+<div class="container">
+        <h2>Thêm Lịch Bảo Vệ</h2>
+        <form action="{{ route('lichbaove.save_lbv') }}" method="POST">
+                @csrf
+                <input type="hidden" name="MA_BV">
+                <div class="form-group">
+                        <label for="MA_BV">Mã Buổi Bảo Vệ</label>
+                        <input type="text" class="form-control" id="MA_BV" name="MA_BV" value="{{ $newCode }}" readonly>
+                </div>
+                <div class="form-group">
+                        <label for="MA_PH">Phòng Học</label>
+                        <select class="form-control" id="MA_PH" name="MA_PH">
+                                @foreach($phong_hoc as $phong)
+                                <option value="{{ $phong->MA_PH }}">{{ $phong->TEN_PH }}</option>
+                                @endforeach
+                        </select>
+                </div>
+                <div class="form-group">
+                        <label for="NGAY_BV">Ngày Bảo Vệ</label>
+                        <input type="date" class="form-control" id="NGAY_BV" name="NGAY_BV" required>
+                </div>
+                <div class="form-group">
+                        <label for="GIO_BATDAU_BV">Giờ Bắt Đầu</label>
+                        <input type="time" class="form-control" id="GIO_BATDAU_BV" name="GIO_BATDAU_BV" required>
+                </div>
+                <div class="form-group">
+                        <label for="sinh_vien">Chọn Sinh Viên</label>
+                        <select class="form-control" id="sinh_vien" name="sinh_vien[]" multiple required>
+                                @foreach($sinh_vien as $sv)
+                                <option value="{{ $sv->MA_SV }}">{{ $sv->HOTEN_SV }}</option>
+                                @endforeach
+                        </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Thêm Lịch Bảo Vệ</button>
+        </form>
+</div>
+@endsection
+
+
+
+
+@extends('admin-layout')
+@section('admin_content')
+
+<div class="col-lg-12">
+        <div class="card">
+                <div class="card-header">
+                        <h4>Danh Sách Lịch Bảo Vệ</h4>
+                </div>
+                <div class="card-body">
+                        <table class="table table-striped">
+                                <thead>
+                                        <tr>
+                                                <th>Mã Buổi Bảo Vệ</th>
+                                                <th>Phòng Học</th>
+                                                <th>Giờ Bắt Đầu</th>
+                                                <th>Ngày Bảo Vệ</th>
+                                                <th>Thời Lượng</th>
+                                                <th>Số Lượng Sinh Viên</th>
+                                        </tr>
+                                </thead>
+                                <tbody>
+                                        @foreach($buoi_bao_ve as $bbv)
+                                        <tr>
+                                                <td>{{ $bbv->MA_BV }}</td>
+                                                <td>{{ $bbv->MA_PH }}</td>
+                                                <td>{{ $bbv->GIO_BATDAU_BV }}</td>
+                                                <td>{{ $bbv->NGAY_BV }}</td>
+                                                <td>{{ $bbv->THOILUONG_BV }} phút</td>
+                                                <td>{{ $bbv->SO_LUONG_BV }}</td>
+                                        </tr>
+                                        @endforeach
+                                </tbody>
+                        </table>
+                </div>
+        </div>
+</div>
+
+@endsection
+
+
+<!-- Modal Chi Tiết Hội Đồng -->
+<div class="modal fade" id="modal-detail" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                        <div class="modal-header">
+                                <h5 class="modal-title" id="modalLabel">Chi Tiết Hội Đồng</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                </button>
+                        </div>
+                        <div class="modal-body">
+                                <h4>Thông Tin Hội Đồng</h4>
+                                <p><strong>Mã Hội Đồng:</strong> <span id="maHd"></span></p>
+                                <p><strong>Chủ Tịch:</strong> <span id="chuTich"></span></p>
+                                <p><strong>Phó Chủ Tịch:</strong> <span id="phoChuTich"></span></p>
+                                <p><strong>Thư Ký:</strong> <span id="thuKy"></span></p>
+                                <p><strong>Mã Phòng:</strong> <span id="maPhong"></span></p>
+                                <p><strong>Ngày Bảo Vệ:</strong> <span id="ngayBaoVe"></span></p>
+                                <p><strong>Thời Lượng:</strong> <span id="thoiLuong"></span> phút</p>
+
+                                <h5>Sinh Viên Bảo Vệ</h5>
+                                <ul id="sinhVienList"></ul>
+                        </div>
+                        <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        </div>
+                </div>
+        </div>
+</div>
+
+
+
+<script>
+$(document).ready(function() {
+        $('.view_parcel').on('click', function() {
+                var maHd = $(this).data('id'); // Lấy mã hội đồng từ data-id
+
+                $.ajax({
+                        url: '/details/' + MA_HD
+                        maHd, // Gọi route với mã hội đồng
+                        method: 'GET',
+                        success: function(response) {
+                                if (response.error) {
+                                        alert(response.error);
+                                        return;
+                                }
+
+                                // Điền dữ liệu vào modal
+                                $('#modal-detail #maHd').text(
+                                        response.hoiDong
+                                        .MA_HD);
+                                $('#modal-detail #chuTich')
+                                        .text(response.hoiDong
+                                                .CHU_TICH_HD);
+                                $('#modal-detail #phoChuTich')
+                                        .text(response.hoiDong
+                                                .PHO_CHU_TICH_HD
+                                        );
+                                $('#modal-detail #thuKy').text(
+                                        response.hoiDong
+                                        .THUKY_HD);
+                                $('#modal-detail #maPhong')
+                                        .text(response.hoiDong
+                                                .MA_PH);
+                                $('#modal-detail #ngayBaoVe')
+                                        .text(response.hoiDong
+                                                .NGAY_BV);
+                                $('#modal-detail #thoiLuong')
+                                        .text(response.hoiDong
+                                                .THOILUONG_BV);
+
+                                // Xóa nội dung cũ của danh sách sinh viên
+                                $('#sinhVienList').empty();
+
+                                // Lặp qua danh sách sinh viên và thêm vào modal
+                                response.sinhVien.forEach(
+                                        function(
+                                                sinhVien
+                                        ) {
+                                                $('#sinhVienList')
+                                                        .append(
+                                                                '<li>Mã SV: ' +
+                                                                sinhVien
+                                                                .MA_SV +
+                                                                ', Tên: ' +
+                                                                sinhVien
+                                                                .HOTEN_SV +
+                                                                ', Đề tài: ' +
+                                                                sinhVien
+                                                                .TEN_DT +
+                                                                ', GVHD: ' +
+                                                                sinhVien
+                                                                .GVHD +
+                                                                ', Giờ bắt đầu: ' +
+                                                                sinhVien
+                                                                .GIO_BAT_DAU +
+                                                                ', Giờ kết thúc: ' +
+                                                                sinhVien
+                                                                .GIO_KET_THUC +
+                                                                '</li>'
+                                                        );
+                                        });
+
+                                // Hiển thị modal
+                                $('#modal-detail').modal(
+                                        'show');
+                        },
+                        error: function(xhr, status, error) {
+                                console.error('Lỗi khi tải dữ liệu:',
+                                        error);
+                                alert(
+                                        'Lỗi khi tải dữ liệu. Vui lòng thử lại sau.'
+                                        );
+                        }
+                });
+        });
+});
+</script>
+
+
+
+
+  <!-- <div class="form-group">
+                                        <label for="HOI_DONG">Hội Đồng</label>
+                                        <select name="HOI_DONG" class="form-control select2">
+                                                <option disabled selected>Chọn hội đồng</option>
+                                                @foreach($hoi_dong as $hd)
+                                                <option value="{{ $hd->MA_HD }}">
+                                                        {{ $hd->CHU_TICH_TEN }} (Chủ tịch), {{ $hd->PHO_CHU_TICH_TEN }}
+                                                        (Phó chủ tịch), {{ $hd->THUKY_TEN }} (Thư ký)
+                                                </option>
+                                                @endforeach
+                                        </select>
+                                </div> -->
+
+
+
+    <!-- <td class="align-middle">
+                                                        <span class="d-block font-weight-bold">{{ $bbv->CHU_TICH_HD }}
+                                                                (Chủ tịch)</span>
+                                                        <span class="d-block">{{ $bbv->PHO_CHU_TICH_HD }} (Phó chủ
+                                                                tịch)</span>
+                                                        <span class="d-block">{{ $bbv->THU_KY_HD }} (Thư ký)</span>
+                                                </td> -->
+
+<?php
+<?php  
+
+namespace App\Http\Controllers;  
+
+use Illuminate\Http\Request;  
+use Illuminate\View\View;  
+use Illuminate\Support\Facades\DB;   
+use Illuminate\Support\Facades\Redirect;   
+
+class LichBaoVeController extends Controller  
+{  
+    public function list_lbv()  
+    {  
+        // Truy vấn danh sách buổi bảo vệ kèm theo thông tin hội đồng  
+        $buoi_bao_ve = DB::table('buoi_bao_ve')  
+            ->join('phong_hoc', 'buoi_bao_ve.MA_PH', '=', 'phong_hoc.MA_PH')  
+            ->select(  
+                'buoi_bao_ve.MA_BV',  
+                'buoi_bao_ve.MA_PH',  
+                'buoi_bao_ve.GIO_BATDAU_BV',  
+                'buoi_bao_ve.NGAY_BV',  
+                'buoi_bao_ve.THOILUONG_BV',  
+                'buoi_bao_ve.SO_LUONG_BV'  
+            )  
+            ->get();  
+
+        return view('admin.lichbaove.list_lichbaove', compact('buoi_bao_ve'));  
+    }  
+
+    public function add_lbv(Request $request)  
+    {  
+        // Lấy danh sách phòng học  
+        $phong_hoc = DB::table('phong_hoc')->orderBy('MA_PH', 'desc')->get();  
+
+        // Lấy mã buổi bảo vệ cuối cùng từ bảng  
+        $lastCode = DB::table('buoi_bao_ve')->orderBy('MA_BV', 'desc')->value('MA_BV');  
+        
+        // Tạo mã buổi bảo vệ mới  
+        if ($lastCode) {  
+            $number = (int) filter_var($lastCode, FILTER_SANITIZE_NUMBER_INT);  
+            $newCode = 'BV' . str_pad($number + 1, 2, '0', STR_PAD_LEFT);  
+        } else {  
+            $newCode = 'BV01';  
+        }  
+
+        // Lấy danh sách sinh viên  
+        $sinh_vien = DB::table('sinh_vien')->get();  
+
+        // Trả dữ liệu về view  
+        return view('admin.lichbaove.add_lichbaove', [  
+            'newCode' => $newCode,  
+            'phong_hoc' => $phong_hoc,  
+            'sinh_vien' => $sinh_vien  
+        ]);  
+    }  
+
+    public function save_lbv(Request $request)  
+    {  
+        // Kiểm tra trùng phòng và thời gian bảo vệ  
+        $existingSchedule = DB::table('buoi_bao_ve')  
+            ->where('NGAY_BV', $request->NGAY_BV)  
+            ->where('MA_PH', $request->MA_PH)  
+            ->whereBetween('GIO_BATDAU_BV', [  
+                date('H:i', strtotime($request->GIO_BATDAU_BV . ' -40 minutes')),  
+                date('H:i', strtotime($request->GIO_BATDAU_BV . ' +40 minutes'))  
+            ])  
+            ->exists();  
+    
+        if ($existingSchedule) {  
+            return redirect()->back()->withErrors([  
+                'Có lịch bảo vệ khác trùng phòng trong khoảng thời gian gần đây (40 phút). Vui lòng chọn thời gian khác.'  
+            ]);  
+        }  
+    
+        $soLuongBV = count($request->input('sinh_vien', []));  
+        $thoiLuongBV = 40; // Assuming each defense lasts for 40 minutes  
+    
+        // Chèn dữ liệu vào bảng `buoi_bao_ve`  
+        DB::table('buoi_bao_ve')->insert([  
+            'MA_BV' => $request->MA_BV,  
+            'MA_PH' => $request->MA_PH,  
+            'GIO_BATDAU_BV' => $request->GIO_BATDAU_BV,  
+            'NGAY_BV' => $request->NGAY_BV,  
+            'SO_LUONG_BV' => $soLuongBV,  
+            'THOILUONG_BV' => $thoiLuongBV  
+        ]);  
+    
+        $gio_bat_dau = $request->GIO_BATDAU_BV;  
+    
+        foreach ($request->input('sinh_vien', []) as $index => $ma_sv) {  
+            if ($index > 0) {  
+                $gio_bat_dau = date('H:i', strtotime("+40 minutes", strtotime($gio_bat_dau)));  
+            }  
+    
+            // Chèn vào `chitiet_lichbv` với giá trị `MA_BV` đã tồn tại  
+            DB::table('chitiet_lichbv')->insert([  
+                'MA_BV' => $request->MA_BV,  
+                'MA_SV' => $ma_sv,  
+                'gio_bat_dau' => $gio_bat_dau,  
+                'gio_ket_thuc' => date('H:i', strtotime("+40 minutes", strtotime($gio_bat_dau)))  
+            ]);  
+        }  
+    
+        return redirect()->route('lichbaove.list_lbv')->with('thongbao', 'Thêm lịch bảo vệ thành công!');  
+    }
+    public function showBuoiBaoVe($ma_bv)  
+    {  
+        // Truy vấn để lấy thông tin buổi bảo vệ và phòng học  
+        $buoiBaoVe = DB::table('buoi_bao_ve')  
+            ->join('phong_hoc', 'buoi_bao_ve.MA_PH', '=', 'phong_hoc.MA_PH')  
+            ->where('buoi_bao_ve.MA_BV', $ma_bv)  
+            ->select(  
+                'buoi_bao_ve.MA_BV',  
+                'buoi_bao_ve.NGAY_BV',  
+                'buoi_bao_ve.GIO_BATDAU_BV',  
+                'phong_hoc.TEN_PH'  
+            )  
+            ->first();  
+
+        // Lấy danh sách sinh viên tham gia buổi bảo vệ  
+        $sinhVienList = DB::table('chitiet_lichbv')  
+            ->join('sinh_vien', 'chitiet_lichbv.MA_SV', '=', 'sinh_vien.MA_SV')  
+            ->join('de_tai', 'sinh_vien.MA_DT', '=', 'de_tai.MA_DT')  
+            ->where('chitiet_lichbv.MA_BV', $ma_bv)  
+            ->select(  
+                'sinh_vien.MA_SV',  
+                'sinh_vien.HOTEN_SV',  
+                'de_tai.TEN_DT'  
+            )  
+            ->get();  
+
+        // Trả về view với dữ liệu buổi bảo vệ và danh sách sinh viên  
+        return view('admin.lichbaove.buoi_bao_ve_detail', [  
+            'buoiBaoVe' => $buoiBaoVe,  
+            'sinhVienList' => $sinhVienList  
+        ]);  
+    }  
+
+    public function getSinhVienByBuoiBaoVe($ma_bv)  
+    {  
+        \Log::info("Mã Buổi Bảo Vệ: " . $ma_bv); // Ghi log giá trị $ma_bv  
+        
+        $sinhVienList = DB::table('chitiet_lichbv')  
+            ->join('sinh_vien', 'chitiet_lichbv.MA_SV', '=', 'sinh_vien.MA_SV')  
+            ->join('de_tai', 'sinh_vien.MA_DT', '=', 'de_tai.MA_DT')  
+            ->where('chitiet_lichbv.MA_BV', $ma_bv)  
+            ->select('sinh_vien.MA_SV', 'sinh_vien.HOTEN_SV', 'de_tai.TEN_DT')  
+            ->get();  
+
+        return response()->json(['sinhVien' => $sinhVienList]);  
+    }  
+}
