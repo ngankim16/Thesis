@@ -288,6 +288,14 @@
                                                                           </a>
                                                                   </li>
                                                                   <li class="nav-item">
+                                                                          <a href="{{route('student.up')}}"
+                                                                                  class="nav-link nav-new_staff tree-item">
+                                                                                  <i
+                                                                                          class="fas fa-angle-right nav-icon"></i>
+                                                                                  <p>tài</p>
+                                                                          </a>
+                                                                  </li>
+                                                                  <li class="nav-item">
                                                                           <a href="{{route('detai.list_dt')}}"
                                                                                   class="nav-link nav-staff_list tree-item">
                                                                                   <i
@@ -331,15 +339,14 @@
                                                           <a href="https://www.ctu.edu.vn/" class="nav-link"
                                                                   target="_blank">
                                                                   <img src="{{asset('back-end/uploads/ctu.png')}}"
-                                                                          alt="CTU Logo"
-                                                                          style="max-width: 100%; height: auto;">
+                                                                          alt="CTU Logo" class="img-responsive">
                                                           </a>
                                                   </li>
+
                                           </ul>
                                   </nav>
                           </div>
                   </aside>
-
 
                   <div class="content-wrapper">
                           <div class="toast" id="alert_toast" role="alert" aria-live="assertive" aria-atomic="true">

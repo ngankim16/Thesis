@@ -1,3 +1,9 @@
+<!-- Include jQuery trước -->
+<script src="path/to/jquery.min.js"></script>
+<!-- Sau đó là DataTables script -->
+<script src="path/to/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="path/to/dataTables.bootstrap4.min.css">
+
 @extends('admin-layout')
 @section('admin_content')
 <div class="container mt-5">

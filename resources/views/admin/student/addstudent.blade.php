@@ -81,17 +81,19 @@
 
                                                         </div>
                                                 </div>
-                                                <div class="col-sm-6 form-group">
+                                                <!-- <div class="col-sm-6 form-group">
                                                         <label for="imageUpload" class="label"
                                                                 style="padding-top=20px;">Upload Hình
                                                                 Ảnh</label>
                                                         <input type="file" name="avt_sv" id="imageUpload" class="pre"
                                                                 accept="image/*" required>
 
-                                                </div>
+                                                </div> -->
 
                                         </div>
                                 </div>
+
+
                                 <div class="row">
                                         <div class="col-md-6">
                                                 <button type="submit" name="submit" class="btn btn-primary"

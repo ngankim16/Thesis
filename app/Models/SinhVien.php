@@ -26,4 +26,5 @@ class SinhVien extends Model
     puBlic function DeTai(){
         return $this->belongTo(DeTai::class,'MA_DT','MA_DT');
     }
+    
 }

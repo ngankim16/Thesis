@@ -28,7 +28,7 @@
                                                         <th class="text-center">#</th>
                                                         <th>Mã đề tài</th>
                                                         <th class="text-center">Tên đề tài</th>
-                                                        <th>Ngày nộp</th>
+
                                                         <th>Action</th>
                                                 </tr>
                                         </thead>
@@ -38,7 +38,6 @@
                                                         <td class="text-center">{{ $index + 1 }}</td>
                                                         <td class="text-center"><b>{{ $de_tai->MA_DT }}</b></td>
                                                         <td class="text-center"><b>{{ $de_tai->TEN_DT }}</td>
-                                                        <td class="text-center"><b>{{ $de_tai->NGAYNOP }}</b></td>
                                                         <td class="text-center">
                                                                 <div class="btn-group">
                                                                         <a href="{{ route('detai.edit_dt', $de_tai->MA_DT) }}"

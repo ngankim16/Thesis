@@ -27,7 +27,7 @@
                                                         </div>
                                                 </div>
 
-                                                <div class="row">
+                                                <!-- <div class="row">
 
 
                                                         <div class="col-sm-6 form-group ">
@@ -37,7 +37,7 @@
                                                                         class="form-control " required>
                                                         </div>
                                                 </div>
-
+ -->
 
 
                                         </div>

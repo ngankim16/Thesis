@@ -31,8 +31,6 @@
                                                         <!-- Điều chỉnh độ rộng cho cột # -->
                                                         <th style="width: 100px;">Mã sv</th>
                                                         <!-- Điều chỉnh độ rộng cho cột Mã sv -->
-                                                        <th style="width: 80px;">AVT</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột AVT -->
                                                         <th style="width: 150px;">Họ tên</th>
                                                         <!-- Điều chỉnh độ rộng cho cột Họ tên -->
                                                         <th class="ten-de-tai" style="width: 250px;">Tên đề tài</th>
@@ -56,11 +54,7 @@
                                                 <tr>
                                                         <td class="text-center">{{ $index + 1 }}</td>
                                                         <td><b>{{ $sv->MA_SV }}</b></td>
-                                                        <td>
-                                                                <img src="{{ asset('font-end/img/' . $sv->AVT_SV) }}"
-                                                                        alt="Hình ảnh sinh viên"
-                                                                        style="width: 90px; height: auto;">
-                                                        </td>
+
                                                         <td><b>{{ $sv->HOTEN_SV }}</td>
                                                         <td>
                                                                 <b>{{ $de_tai->where('MA_DT', $sv->MA_DT)->first()->TEN_DT ?? 'N/A' }}</b>

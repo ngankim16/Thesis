@@ -89,7 +89,7 @@
 
                                                         </div>
                                                 </div>
-                                                <div class="col-sm-6 form-group">
+                                                <!-- <div class="col-sm-6 form-group">
                                                         <label for="imageUpload" class="label"
                                                                 style="padding-top=20px;">Upload
                                                                 Hình
@@ -98,7 +98,7 @@
                                                                 accept="image/*" value="{{$sinh_vien->AVT_SV}}"
                                                                 required>
 
-                                                </div>
+                                                </div> -->
 
                                         </div>
                                 </div>

@@ -100,7 +100,7 @@ class LichBaoVeController extends Controller
             'sinh_vien' => 'required|array',
         ]);
     
-        // Khởi tạo biến
+    
         $morning_start = '07:15';
         $morning_end = '10:10';
         $afternoon_start = '13:30';
@@ -123,9 +123,9 @@ class LichBaoVeController extends Controller
             }
     
             // Xác định thời gian bắt đầu cho sinh viên
-            if ($current_students < 6) { // 6 sinh viên cho buổi sáng
+            if ($current_students < 6) { 
                 $current_time = date('H:i', strtotime('07:15 + ' . ($current_students * $time_increment) . ' minutes'));
-            } else { // 7 sinh viên cho buổi chiều
+            } else {
                 $current_time = date('H:i', strtotime('13:30 + ' . (($current_students - 6) * $time_increment) . ' minutes'));
             }
     
@@ -144,7 +144,7 @@ class LichBaoVeController extends Controller
                 $current_room = 1;
                 $current_students = 0;
                 $current_time = $morning_start;
-                // Đặt lại thời gian cho sinh viên
+      
                 $current_time = $current_students < 6 ?
                     date('H:i', strtotime('07:15 + ' . ($current_students * $time_increment) . ' minutes')) :
                     date('H:i', strtotime('13:30 + ' . (($current_students - 6) * $time_increment) . ' minutes'));
@@ -154,10 +154,9 @@ class LichBaoVeController extends Controller
             if ($availableRoom) {
                 $ma_ph = $availableRoom->MA_PH;
     
-                // Sắp xếp cho sinh viên
                 $this->scheduleStudent($ma_sv, $ma_ph, $current_time, $ma_hd, $current_day);
     
-                $current_students++; // Cập nhật số sinh viên đã sắp xếp
+                $current_students++; 
     
                 // Nếu phòng hiện tại đã đầy sinh viên
                 if ($current_students >= $max_sessions_per_room) {
@@ -171,7 +170,7 @@ class LichBaoVeController extends Controller
         return redirect()->route('lichbaove.list_lbv')->with('thongbao', 'Thêm lịch bảo vệ thành công!');
     }
     
-    // Phương thức tìm phòng còn trống
+  
     private function findAvailableRoom($current_time, $current_day, $current_room) {
         return DB::table('phong_hoc')
             ->whereNotExists(function ($query) use ($current_time, $current_day) {
@@ -188,13 +187,12 @@ class LichBaoVeController extends Controller
             ->first();
     }
     
-    // Phương thức sắp xếp cho sinh viên
+    
     private function scheduleStudent($ma_sv, $ma_ph, $gio_bat_dau, $ma_hd, $ngay_bv) {
-        // Sinh mã buổi bảo vệ duy nhất
         $lastMaBV = DB::table('buoi_bao_ve')->orderBy('MA_BV', 'desc')->first();
         $ma_bv = $lastMaBV ? 'BV' . str_pad((int)substr($lastMaBV->MA_BV, 2) + 1, 3, '0', STR_PAD_LEFT) : 'BV001';
     
-        // Chèn buổi bảo vệ vào cơ sở dữ liệu
+        
         DB::table('buoi_bao_ve')->insert([
             'MA_BV' => $ma_bv,
             'MA_PH' => $ma_ph,
@@ -206,7 +204,7 @@ class LichBaoVeController extends Controller
         // Tính giờ kết thúc cho buổi bảo vệ
         $gio_ket_thuc = date('H:i', strtotime("+35 minutes", strtotime($gio_bat_dau)));
     
-        // Chèn chi tiết buổi bảo vệ
+       
         DB::table('chitiet_lichbv')->insert([
             'MA_BV' => $ma_bv,
             'MA_SV' => $ma_sv,
@@ -214,7 +212,7 @@ class LichBaoVeController extends Controller
             'GIO_KET_THUC' => $gio_ket_thuc,
         ]);
     
-        // Chèn thông tin tổ chức
+  
         DB::table('to_chuc')->insert([
             'MA_HD' => $ma_hd,
             'MA_BV' => $ma_bv,

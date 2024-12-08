@@ -19,10 +19,10 @@
                                         <input type="text" name="ten_dt" class="form-control" required>
                                 </div>
 
-                                <div class="form-group">
+                                <!-- <div class="form-group">
                                         <label for="ngaynop" class="control-label">Ngày nộp</label>
                                         <input type="date" name="ngaynop" class="form-control" required>
-                                </div>
+                                </div> -->
 
                                 <div class="text-center mt-4">
                                         <button type="submit" class="btn btn-primary">Thêm</button>

@@ -7,7 +7,7 @@
         <!-- Hội Đồng Chưa Duyệt -->
         <h4 class="text-center">Hội Đồng Chưa Duyệt</h4>
 
-        <!-- Only show the "Duyệt Tất Cả" button if there are pending committees -->
+
         @if ($hoidongs->where('DUYET_THAM_GIA', null)->isNotEmpty())
         <div class="mb-4">
                 <form action="{{ route('giangvien.duyetTatCaHoiDong') }}" method="POST">

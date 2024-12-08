@@ -20,7 +20,7 @@ use App\Http\Controllers\SinhVien;
 */
 Route::get('/dashboard_sinh_vien',[HomeController::class,'show_dashboard_sv']);
 //Route hiển thị giao diện đăng nhập
-Route::get('/login', [HomeController::class, 'index'])->name('login'); 
+Route::get('/', [HomeController::class, 'index'])->name('login'); 
 
 // Route xử lý đăng nhập
 Route::post('/login_dashboard', [HomeController::class, 'dangnhap']); 
@@ -40,6 +40,10 @@ Route::group(['prefix'=>'student','as'=>'student.'],function(){
         Route::delete('/delete_student/{MA_SV}', [Student::class, 'delete_st'])->name('delete_st');
 
         Route::get('/edit_student/{MA_SV}', [Student::class, 'edit_st'])->name('edit_st');  
+
+        Route::get('upload-file', [Student::class, 'up'])->name('up');  
+        Route::post('/import-sinhvien-word', [Student::class, 'import'])->name('word');
+
 });
 
 Route::group(['prefix'=>'detai','as'=>'detai.'],function(){
