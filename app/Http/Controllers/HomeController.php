@@ -61,7 +61,7 @@ if ($hoidongsChuaDuyet->isNotEmpty()) {
             // Lưu thông tin giảng viên vào session
             Session::put('MA_GV', $giangVien->MA_GV);
             Session::put('HOTEN_GV', $giangVien->HOTEN_GV);
-            Session::put('AVT_GV', $giangVien->AVT_GV);
+          
     
             // Kiểm tra lịch bảo vệ sắp tới cho giảng viên
             return $this->checkUpcomingScheduleForGiangVien($giangVien->MA_GV);
@@ -73,7 +73,7 @@ if ($hoidongsChuaDuyet->isNotEmpty()) {
                 // Lưu thông tin sinh viên vào session
                 Session::put('MA_SV', $sinhVien->MA_SV);
                 Session::put('HOTEN_SV', $sinhVien->HOTEN_SV);
-                Session::put('AVT_SV', $sinhVien->AVT_SV);
+            
     
                 // Kiểm tra lịch bảo vệ sắp tới cho sinh viên
                 return $this->checkUpcomingScheduleForSinhVien($sinhVien->MA_SV);

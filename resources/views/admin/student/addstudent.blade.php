@@ -3,6 +3,10 @@
 
 <div class="col-lg-12">
         <div class="card card-outline">
+                <div class="card-header bg-primary text-white d-flex align-items-center justify-content-center"
+                        style="border-top-left-radius: .5rem; border-top-right-radius: .5rem; padding: 1rem; background: #74b9ff;">
+                        <h4 class="mb-0 font-weight-bold">Thêm Sinh Viên</h4>
+                </div>
                 <div class="card-body">
                         <form action="{{ route('student.save_st') }}" method="POST" id="manage-staff">
                                 {{ csrf_field( )}}
@@ -49,14 +53,7 @@
                                                         </div>
                                                 </div>
 
-                                                <div class="row">
-                                                        <div class="col-sm-6 form-group ">
-                                                                <label for="" class="control-label">Số điện
-                                                                        thoại</label>
-                                                                <input type="text" name="sdt_sv" id=""
-                                                                        class="form-control " required>
-                                                        </div>
-                                                </div>
+
 
                                                 <div class="row">
                                                         <div class="col-sm-6 form-group ">
@@ -79,6 +76,23 @@
                                                                         @endforeach
                                                                 </select>
 
+                                                        </div>
+                                                </div>
+                                                <div class="row">
+                                                        <div class="col-sm-6 form-group ">
+                                                                <label for="" class="control-label">Học Kỳ</label>
+
+                                                                <select name="hoc_ky" id="hoc_ky"
+                                                                        class="form-control  select2">
+                                                                        <option value="1">Học Kỳ 1</option>
+                                                                        <option value="2">Học Kỳ 2</option>
+
+                                                                </select>
+                                                        </div>
+                                                        <div class=" col-sm-6 form-group ">
+                                                                <label for="" class=" control-label">Năm học</label>
+                                                                <input type="nam_hoc" name="nam_hoc" id=""
+                                                                        class="form-control " required>
                                                         </div>
                                                 </div>
                                                 <!-- <div class="col-sm-6 form-group">

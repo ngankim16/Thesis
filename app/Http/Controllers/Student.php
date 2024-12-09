@@ -21,9 +21,10 @@ class Student extends Controller
         $data['HOTEN_SV'] = $request -> hoten_sv;
         $data['LOP_SV'] = $request -> lop_sv;
         $data['EMAIL_SV'] = $request->email_sv;  
-        $data['SDT_SV'] = $request->sdt_sv;
         $data['MA_DT'] = $request-> tendetai;
         $data['MA_GV'] = $request->hoten_gv;
+        $data['Hoc_ky'] = $request->hoc_ky;
+        $data['Nam_hoc'] = $request->nam_hoc;
         DB::table('sinh_vien')->insert($data);
         return redirect()->route('student.list_st')->with('thongbao','Thêm sinh viên thành công');
 
@@ -35,13 +36,24 @@ class Student extends Controller
         return view('admin.student.addstudent')->with('de_tai', $de_tai)->with('giang_vien', $giang_vien);
     }
   
-
-    public function list_st() {
-        $sinh_vien = DB::table('sinh_vien')->get();
+    public function list_st(Request $request) {
+        $query = DB::table('sinh_vien');
+    
+        if ($request->has('hoc_ky') && $request->hoc_ky != '') {
+            $query->where('HOC_KY', $request->hoc_ky);
+        }
+    
+        if ($request->has('nam_hoc') && $request->nam_hoc != '') {
+            $query->where('NAM_HOC', $request->nam_hoc);
+        }
+    
+        $sinh_vien = $query->get();
         $de_tai = DB::table('de_tai')->get(); 
         $giang_vien = DB::table('giang_vien')->get();
+    
         return view('admin.student.list_student', compact('sinh_vien', 'de_tai', 'giang_vien'));
     }
+    
     
     public function edit_st($MA_SV) {
         $sinh_vien = DB::table('sinh_vien')->where('MA_SV', $MA_SV)->first();
@@ -59,7 +71,6 @@ class Student extends Controller
         $data = [
             'HOTEN_SV' => $request->hoten_sv,
             'EMAIL_SV' => $request->email_sv,
-            'SDT_SV' => $request->sdt_sv,
             'LOP_SV' => $request->lop_sv,
             'MA_DT' => $request->tendetai,
             'MA_GV' => $request->tengiangvien

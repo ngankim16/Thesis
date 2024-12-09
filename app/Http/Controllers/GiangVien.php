@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash; 
 use Illuminate\Support\Facades\Redirect; 
 
-use Illuminate\Support\Facades\Mail; // Sử dụng thư viện Mail
+use Illuminate\Support\Facades\Mail; 
 use App\Mail\LichBaoVeMail;
 use Session;
 class GiangVien extends Controller
@@ -31,7 +31,7 @@ class GiangVien extends Controller
         $data['EMAIL_GV'] = $request -> email_gv;
         $data['SDT_GV'] = $request ->sdt_gv;
         $data['NGAYSINH_GV'] =$request->ngaysinh_gv;  
-        // Lưu dữ liệu vào bảng 'sinh_vien'
+        
         DB::table('giang_vien')->insert($data);
     
         // Đặt thông báo thành công và chuyển hướng người dùng

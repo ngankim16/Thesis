@@ -21,7 +21,8 @@
                                 @php
                                 $globalIndex = 1;
                                 // Sắp xếp theo ngày, phòng và giờ bắt đầu
-                                $groupedHoidongs = $hoiDongs->sortBy('GIO_BAT_DAU')->groupBy(function($item) {
+                                $groupedHoidongs = $hoiDongs->sortBy(['NGAY_BV', 'TEN_PH',
+                                'GIO_BAT_DAU'])->groupBy(function($item) {
                                 return $item->NGAY_BV . ',' . $item->TEN_PH;
                                 });
                                 @endphp
@@ -37,7 +38,8 @@
 
                                 <div class="mb-3">
                                         <p><strong>Ngày:</strong> {{ $ngay }} – <strong>Phòng:</strong> {{ $phong }} –
-                                                <strong>Tổng số sinh viên:</strong> {{ $totalStudents }}</p>
+                                                <strong>Tổng số sinh viên:</strong> {{ $totalStudents }}
+                                        </p>
                                 </div>
 
                                 <table class="table table-bordered mt-3 table-content">
@@ -79,8 +81,8 @@
                                 @endif
 
                                 @if($hoiDongs->isNotEmpty())
-                                <a href="{{ route('hoidong.danh_gia', $hoiDongs->first()->MA_HD) }}"
-                                        class="btn btn-info" target="_blank">In Phiếu</a>
+                                <a href="{{ route('hoidong.danh_gia', $hoiDongs->first()->MA_HD,['hoc_ky' => request('hoc_ky'), 'nam_hoc' => request('nam_hoc')] ) }}"
+                                        class="btn btn-info" target="_blank"> <i class="fa fa-print"></i>In Phiếu</a>
                                 @else
                                 <p>Không có hội đồng nào để in phiếu.</p>
                                 @endif
@@ -130,7 +132,7 @@
 }
 
 .table-bordered {
-        border: 2px solid #2c3e50;
+        border: 1px solid #2c3e50;
 }
 
 .table th,

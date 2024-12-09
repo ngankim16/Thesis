@@ -9,7 +9,7 @@
         body {
                 font-family: DejaVu Serif, serif;
                 margin: 10px;
-                line-height: 1.2;
+                line-height: 1;
                 font-size: 14px;
                 /* Thu hẹp khoảng cách dòng */
         }
@@ -18,7 +18,7 @@
         .header {
                 display: flex;
                 justify-content: space-between;
-                margin-bottom: 10px;
+                margin-bottom: 9px;
         }
 
         .header p {
@@ -319,8 +319,6 @@
                 </table>
                 <p><strong>Đánh giá (điểm chữ): </strong>
                 </p>
-
-
                 <div class=" student-section" style=" text-align: right;">
                         <p>Ngày {{ now()->day }} tháng {{ now()->month }} năm {{ now()->year }}
                         </p>

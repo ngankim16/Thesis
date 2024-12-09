@@ -15,17 +15,40 @@ class baoveluanvan extends Controller
     public function list_hd(){
         return view('admin.list_hoidong');
     }
-    public function taoHoiDong()
+
+    public function create_hoidong(){
+        return view('admin.create_hd');
+    }
+    public function taoHoiDong(Request $request)
     {
-        // Kiểm tra nếu đã có hội đồng được tạo trước đó
-        $existing = DB::table('duoc_danh_gia')->exists();
-        if ($existing) {
-            return redirect()->back()->with('thongbao', 'Hội đồng đã được tạo trước đó.');
-        }
+        // Validate học kỳ và năm học được nhập vào từ form
+        $request->validate([
+            'hoc_ky' => 'required|integer',
+            'nam_hoc' => 'required|string',
+        ]);
     
-        // Lấy danh sách giảng viên và sinh viên
+        $hocKy = $request->hoc_ky;
+        $namHoc = $request->nam_hoc;
+    
+        // Kiểm tra nếu đã có hội đồng được tạo trước đó
+        // $existing = DB::table('duoc_danh_gia')
+        // ->join('sinh_vien','duoc_danh_gia.MA_DT','=','sinh_vien.MA_DT')
+        // ->where('sinh_vien.HOC_KY',$hocKy)
+        // ->where('sinh_vien.NAM_HOC',$namHoc)
+        // ->exists();
+        // if($existing){
+        //     return redirect()->back()->with('thongbao', 'Hội đồng cho học kỳ này đã được tạo trước đó.');
+        // }
+        
+    
+        // Lấy danh sách giảng viên
         $giangViens = DB::table('giang_vien')->get();
-        $sinhViens = DB::table('sinh_vien')->get();
+    
+        // Lấy danh sách sinh viên theo học kỳ và năm học
+        $sinhViens = DB::table('sinh_vien')
+            ->where('HOC_KY', $hocKy)
+            ->where('NAM_HOC', $namHoc)
+            ->get();
     
         // Kiểm tra nếu không có đủ giảng viên hoặc sinh viên
         if ($giangViens->isEmpty() || $sinhViens->isEmpty()) {
@@ -49,11 +72,11 @@ class baoveluanvan extends Controller
                 return $gv->MA_GV != $maGVHuongDan;
             });
     
-            // Chọn Chủ tịch (chỉ chọn một lần cho giảng viên hướng dẫn này)
+            // Chọn Chủ tịch
             $chuTich = $this->selectGiangVien($giangViensChucVu, $vaiTroGiangVien);
             $vaiTroGiangVien[$chuTich->MA_GV]['so_lan']++;
     
-            // Cập nhật danh sách giảng viên cho Phó Chủ tịch (không thể là Chủ tịch hoặc Giảng viên Hướng dẫn)
+            // Cập nhật danh sách giảng viên cho Phó Chủ tịch
             $giangViensChucVu = $giangViensChucVu->filter(function ($gv) use ($chuTich) {
                 return $gv->MA_GV != $chuTich->MA_GV;
             });
@@ -62,11 +85,11 @@ class baoveluanvan extends Controller
             $phoChuTich = $this->selectGiangVien($giangViensChucVu, $vaiTroGiangVien);
             $vaiTroGiangVien[$phoChuTich->MA_GV]['so_lan']++;
     
-            // Giảng viên hướng dẫn làm Thư ký (giữ họ làm thư ký)
+            // Giảng viên hướng dẫn làm Thư ký
             $thuKy = $giangViens->firstWhere('MA_GV', $maGVHuongDan);
             $vaiTroGiangVien[$thuKy->MA_GV]['so_lan']++;
     
-            // Lưu thông tin Chủ tịch, Phó Chủ tịch và Thư ký chung cho nhóm này
+            // Lưu thông tin hội đồng
             foreach ($sinhViensTrongNhom as $sinhVien) {
                 // Tạo mã hội đồng mới
                 $lastHoiDong = DB::table('hoi_dong_danh_gia')->orderBy('MA_HD', 'desc')->first();
@@ -79,6 +102,8 @@ class baoveluanvan extends Controller
                     'PHO_CHU_TICH_HD' => $phoChuTich->MA_GV,
                     'THUKY_HD' => $thuKy->MA_GV,
                     'NGAY_TAO' => now(),
+                    'Nam_hoc'  => $namHoc,
+                    'Hoc_ky'   => $hocKy,
                 ]);
     
                 // Lưu giảng viên với vai trò vào bảng gom
@@ -91,8 +116,9 @@ class baoveluanvan extends Controller
             }
         }
     
-        return redirect()->back()->with('thongbao', 'Tạo hội đồng thành công.');
+        return redirect()->route('hoidong.index')->with('thongbao', 'Cập nhật hội đồng thành công!');
     }
+    
     
     private function selectGiangVien($giangViens, &$vaiTroGiangVien) {
         // Chọn giảng viên có số lần đảm nhận vai trò ít nhất
@@ -115,24 +141,37 @@ class baoveluanvan extends Controller
     
   
     
-    public function index()
-    {
-        // Lấy danh sách hội đồng và kết hợp với bảng giảng viên để lấy tên
-        $hoiDongs = DB::table('hoi_dong_danh_gia')
-            ->join('giang_vien as chu_tich', 'hoi_dong_danh_gia.CHU_TICH_HD', '=', 'chu_tich.MA_GV')
-            ->join('giang_vien as pho_chu_tich', 'hoi_dong_danh_gia.PHO_CHU_TICH_HD', '=', 'pho_chu_tich.MA_GV')
-            ->join('giang_vien as thu_ky', 'hoi_dong_danh_gia.THUKY_HD', '=', 'thu_ky.MA_GV')
-            ->select(
-                'hoi_dong_danh_gia.MA_HD',
-                'chu_tich.HOTEN_GV as CHU_TICH_TEN', 
-                'pho_chu_tich.HOTEN_GV as PHO_CHU_TICH_TEN', 
-                'thu_ky.HOTEN_GV as THUKY_TEN', 
-                'hoi_dong_danh_gia.NGAY_TAO'
-            )
-            ->get();
-    
-        return view('admin.hoidong', compact('hoiDongs'));
+    public function index(Request $request)
+{
+    // Start the query for 'hoi_dong_danh_gia'
+    $query = DB::table('hoi_dong_danh_gia')
+        ->join('giang_vien as chu_tich', 'hoi_dong_danh_gia.CHU_TICH_HD', '=', 'chu_tich.MA_GV')
+        ->join('giang_vien as pho_chu_tich', 'hoi_dong_danh_gia.PHO_CHU_TICH_HD', '=', 'pho_chu_tich.MA_GV')
+        ->join('giang_vien as thu_ky', 'hoi_dong_danh_gia.THUKY_HD', '=', 'thu_ky.MA_GV')
+        ->select(
+            'hoi_dong_danh_gia.MA_HD',
+            'chu_tich.HOTEN_GV as CHU_TICH_TEN', 
+            'pho_chu_tich.HOTEN_GV as PHO_CHU_TICH_TEN', 
+            'thu_ky.HOTEN_GV as THUKY_TEN', 
+            'hoi_dong_danh_gia.NGAY_TAO'
+        );
+
+    // Apply filters if they are present in the request
+    if ($request->has('hoc_ky') && $request->hoc_ky != '') {
+        $query->where('hoi_dong_danh_gia.HOC_KY', $request->hoc_ky);
     }
+
+    if ($request->has('nam_hoc') && $request->nam_hoc != '') {
+        $query->where('hoi_dong_danh_gia.NAM_HOC', $request->nam_hoc);
+    }
+
+    // Execute the query and get the filtered list
+    $hoiDongs = $query->get();
+
+    // Return the view with the filtered data
+    return view('admin.hoidong', compact('hoiDongs'));
+}
+
 
        public function delete_hd($MA_HD)
        {
@@ -239,14 +278,14 @@ class baoveluanvan extends Controller
     }
     public function update_hd(Request $request, $MA_HD)
     {
-   
+        // Kiểm tra dữ liệu đầu vào
         $request->validate([
             'CHU_TICH_HD' => 'required',
             'PHO_CHU_TICH_HD' => 'required',
             'NGAY_TAO' => 'required|date',
         ]);
     
-       
+        // Lấy thông tin lịch bảo vệ cho hội đồng
         $lichBaoVe = DB::table('chitiet_lichbv')
             ->join('buoi_bao_ve', 'chitiet_lichbv.MA_BV', '=', 'buoi_bao_ve.MA_BV')
             ->join('to_chuc', 'buoi_bao_ve.MA_BV', '=', 'to_chuc.MA_BV')
@@ -254,13 +293,14 @@ class baoveluanvan extends Controller
             ->select('buoi_bao_ve.NGAY_BV', 'chitiet_lichbv.GIO_BAT_DAU')
             ->first();
     
+        // Kiểm tra nếu không tìm thấy lịch bảo vệ
         if (!$lichBaoVe) {
             return redirect()->back()->withErrors([
                 'message' => 'Không tìm thấy thông tin lịch bảo vệ cho hội đồng này.'
             ]);
         }
     
-        
+        // Kiểm tra trùng lịch bảo vệ
         $conflicts = DB::table('buoi_bao_ve')
             ->join('to_chuc', 'buoi_bao_ve.MA_BV', '=', 'to_chuc.MA_BV')
             ->join('hoi_dong_danh_gia', 'to_chuc.MA_HD', '=', 'hoi_dong_danh_gia.MA_HD')
@@ -271,28 +311,36 @@ class baoveluanvan extends Controller
                     ->orWhere('hoi_dong_danh_gia.PHO_CHU_TICH_HD', $request->PHO_CHU_TICH_HD);
             })
             ->where(function ($query) use ($lichBaoVe) {
-                // Check for time conflict in the schedule
+                // Kiểm tra trùng thời gian bảo vệ
                 $query->where('chitiet_lichbv.GIO_BAT_DAU', $lichBaoVe->GIO_BAT_DAU);
             })
             ->where('to_chuc.MA_HD', '!=', $MA_HD) 
             ->exists();
     
+        // Nếu có trùng lịch, thông báo lỗi
         if ($conflicts) {
             return redirect()->back()->withErrors([
                 'message' => 'Lịch của giảng viên trùng vào ngày ' . $lichBaoVe->NGAY_BV . ' lúc ' . $lichBaoVe->GIO_BAT_DAU
             ]);
         }
     
-        
+        // Kiểm tra nếu Chủ Tịch và Phó Chủ Tịch trùng nhau
+        if ($request->CHU_TICH_HD == $request->PHO_CHU_TICH_HD) {
+            return redirect()->back()->withErrors([
+                'message' => 'Chủ Tịch và Phó Chủ Tịch không được trùng nhau!'
+            ]);
+        }
+    
+        // Cập nhật thông tin hội đồng
         DB::table('hoi_dong_danh_gia')->where('MA_HD', $MA_HD)->update([
             'CHU_TICH_HD' => $request->CHU_TICH_HD,
             'PHO_CHU_TICH_HD' => $request->PHO_CHU_TICH_HD,
             'NGAY_TAO' => $request->NGAY_TAO
         ]);
     
+        // Thông báo thành công
         return redirect()->route('hoidong.index')->with('thongbao', 'Cập nhật hội đồng thành công!');
     }
-    
     
     
 public function getDetail($ma_hd)
@@ -352,9 +400,16 @@ public function getDetail($ma_hd)
         'sinhVien' => $sinhVien
     ]);
 }
-public function inPhieuSinhVien()
+public function inPhieuSinhVien(Request $request)
 {
-    // Lấy tất cả hội đồng
+    ini_set('memory_limit', '1G');
+    ini_set('max_execution_time', 600);
+    $namHoc = $request->get('nam_hoc');
+    $hocKy = $request->get('hoc_ky');
+    // Khởi tạo mảng để lưu tất cả phiếu
+    $allPhieu = [];
+
+    // Lấy tất cả hội đồng và dữ liệu liên quan đến mỗi hội đồng
     $hoiDongs = DB::table('hoi_dong_danh_gia')
         ->join('to_chuc', 'hoi_dong_danh_gia.MA_HD', '=', 'to_chuc.MA_HD') 
         ->join('buoi_bao_ve', 'to_chuc.MA_BV', '=', 'buoi_bao_ve.MA_BV')
@@ -371,13 +426,17 @@ public function inPhieuSinhVien()
             'pho_chu_tich.HOTEN_GV as PHO_CHU_TICH_TEN', 
             'thu_ky.HOTEN_GV as THUKY_TEN' 
         )
+        ->when($namHoc, function ($query, $namHoc) {
+            return $query->where('hoi_dong_danh_gia.NAM_HOC', $namHoc);
+        })
+        ->when($hocKy, function ($query, $hocKy) {
+            return $query->where('hoi_dong_danh_gia.HOC_KY', $hocKy);
+        })
         ->get();  
 
-    // Lưu trữ tất cả phiếu đánh giá
-    $allPhieu = [];
-
-    // Lấy danh sách sinh viên cho từng hội đồng
+    // Duyệt qua từng hội đồng
     foreach ($hoiDongs as $hoiDong) {
+        // Lấy danh sách sinh viên cho từng hội đồng
         $sinhViens = DB::table('duoc_danh_gia')
             ->join('sinh_vien', 'duoc_danh_gia.MA_DT', '=', 'sinh_vien.MA_DT')
             ->join('de_tai', 'sinh_vien.MA_DT', '=', 'de_tai.MA_DT')
@@ -397,7 +456,7 @@ public function inPhieuSinhVien()
         // Thêm danh sách sinh viên vào mỗi hội đồng
         $hoiDong->sinhViens = $sinhViens;
 
-        // Tạo phiếu cho từng sinh viên
+        // Tạo phiếu cho từng sinh viên trong hội đồng này
         foreach ($sinhViens as $sinhVien) {
             // Tạo phiếu cho Chủ tịch
             $allPhieu[] = [
@@ -429,8 +488,11 @@ public function inPhieuSinhVien()
     // Tải xuống PDF
     return $pdf->download("phieu_danh_gia_all.pdf");
 }
-public function showHoiDongDanhGia()  
+
+public function showHoiDongDanhGia( Request $request)  
 {  
+    $namHoc = $request->get('nam_hoc');
+    $hocKy = $request->get('hoc_ky');
     // Lấy dữ liệu của hội đồng đánh giá  
     $hoiDongs = DB::table('hoi_dong_danh_gia')  
     ->join('to_chuc', 'hoi_dong_danh_gia.MA_HD', '=', 'to_chuc.MA_HD') 
@@ -449,7 +511,14 @@ public function showHoiDongDanhGia()
         'pho_chu_tich.HOTEN_GV as PHO_CHU_TICH_TEN', 
         'thu_ky.HOTEN_GV as THUKY_TEN' 
     )
-        ->get();  
+    ->when($namHoc, function ($query, $namHoc) {
+        return $query->where('hoi_dong_danh_gia.NAM_HOC', $namHoc);
+    })
+    ->when($hocKy, function ($query, $hocKy) {
+        return $query->where('hoi_dong_danh_gia.HOC_KY', $hocKy);
+    })
+    ->get();  
+
 
     // Lấy thông tin sinh viên cho từng hội đồng  
     foreach ($hoiDongs as $hoiDong) {  
@@ -474,8 +543,10 @@ public function showHoiDongDanhGia()
     return view('admin.hoidong_danhgia', compact('hoiDongs'));  
 }
 
-public function inBienBanSinhVien()
+public function inBienBanSinhVien(Request $request)
 {
+    $namHoc = $request->get('nam_hoc');
+    $hocKy = $request->get('hoc_ky');
     // Lấy tất cả hội đồng
     $hoiDongs = DB::table('hoi_dong_danh_gia')
         ->join('to_chuc', 'hoi_dong_danh_gia.MA_HD', '=', 'to_chuc.MA_HD') 
@@ -493,8 +564,13 @@ public function inBienBanSinhVien()
             'pho_chu_tich.HOTEN_GV as PHO_CHU_TICH_TEN', 
             'thu_ky.HOTEN_GV as THUKY_TEN' 
         )
+        ->when($namHoc, function ($query, $namHoc) {
+            return $query->where('hoi_dong_danh_gia.NAM_HOC', $namHoc);
+        })
+        ->when($hocKy, function ($query, $hocKy) {
+            return $query->where('hoi_dong_danh_gia.HOC_KY', $hocKy);
+        })
         ->get();  
-
     // Lấy danh sách sinh viên cho từng hội đồng
     foreach ($hoiDongs as $hoiDong) {
         $sinhViens = DB::table('duoc_danh_gia')
@@ -614,8 +690,12 @@ public function savehoidong(Request $request)
     return redirect()->back()->with('thongbao', 'Tạo hội đồng thành công và đã gửi thông báo đến giảng viên!');
 }
 
-public function inPhieuDanhGia()
+public function inPhieuDanhGia(Request $request)
 {
+    ini_set('memory_limit', '512M'); 
+    ini_set('max_execution_time', 300);
+    $namHoc = $request->get('nam_hoc');
+    $hocKy = $request->get('hoc_ky');
     // Lấy dữ liệu hội đồng và sinh viên liên quan bằng cách sử dụng eager loading
     $hoiDongs = DB::table('hoi_dong_danh_gia')
         ->join('to_chuc', 'hoi_dong_danh_gia.MA_HD', '=', 'to_chuc.MA_HD')
@@ -633,7 +713,14 @@ public function inPhieuDanhGia()
             'pho_chu_tich.HOTEN_GV as PHO_CHU_TICH_TEN',
             'thu_ky.HOTEN_GV as THUKY_TEN'
         )
-        ->get();
+        ->when($namHoc, function ($query, $namHoc) {
+            return $query->where('hoi_dong_danh_gia.NAM_HOC', $namHoc);
+        })
+        ->when($hocKy, function ($query, $hocKy) {
+            return $query->where('hoi_dong_danh_gia.HOC_KY', $hocKy);
+        })
+        ->get();  
+    
 
     // Lấy sinh viên của mỗi hội đồng trong cùng một truy vấn
     foreach ($hoiDongs as $hoiDong) {
@@ -644,7 +731,7 @@ public function inPhieuDanhGia()
             ->join('giang_vien as gvhd', 'sinh_vien.MA_GV', '=', 'gvhd.MA_GV')
             ->select(
                 'sinh_vien.MA_SV',
-                'sinh_vien.HOTEN_SV',
+                'sinh_vien.HOTEN_SV',                                                                                                                                                                                                                                                                                                                                                                                                                                                       
                 'gvhd.HOTEN_GV as HOTEN_GV',
                 'de_tai.TEN_DT',
                 'chitiet_lichbv.GIO_BAT_DAU'
@@ -655,13 +742,24 @@ public function inPhieuDanhGia()
         $hoiDong->sinhViens = $sinhViens;
     }
 
-    // Tạo PDF từ view cho tất cả phiếu
     $pdf = PDF::loadView('admin.hoidongdg', ['hoiDongs' => $hoiDongs]);
-
-    // Tải xuống PDF
     return $pdf->download("hoidong_danhgia.pdf");
 }
+// public function filterHoiDong(Request $request){
+//     $namHoc = $request->input('nam_hoc');
+//     $hocKy = $request->input('hoc_ky');
+    
+//     // Lọc danh sách hội đồng theo năm học và học kỳ từ bảng 'hoi_dong_danh_gia'
+//     $hoiDongs = DB::table('hoi_dong_danh_gia')
+//         ->where('NAM_HOC', $namHoc)
+//         ->where('HOC_KY', $hocKy)
+//         ->get();
 
+    
+
+//     // Trả về view với dữ liệu lọc
+//     return view('admin.hoidong', compact('hoiDongs', 'namHoc', 'hocKy'));
+// }
 
 
 }

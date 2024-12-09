@@ -68,8 +68,7 @@ Route::group(['prefix'=>'giangvien','as'=>'giangvien.'],function(){
     Route::get('/dashboard', [GiangVien::class, 'showDashboard'])->name('dashboard');  
 
     Route::post('/duyet-tat-ca-hoi-dong', [GiangVien::class, 'duyetTatCaHoiDong'])->name('duyetTatCaHoiDong');
-
-
+        
 //     // Đường dẫn cho giảng viên duyệt hội đồng  
 //     Route::post('/duyet-hoidong/{ma_hd}', [GiangVien::class, 'duyetHoiDong'])->name('duyetHoiDong');  
         Route::post('/duyet-hoidong/{maHd}', [GiangVien::class, 'duyetHoiDong'])->name('duyetHoiDong');
@@ -77,7 +76,7 @@ Route::group(['prefix'=>'giangvien','as'=>'giangvien.'],function(){
 });  
 
 Route::group(['prefix' => 'hoidong', 'as' => 'hoidong.'], function () {
-        Route::get('/tao-hoi-dong', [baoveluanvan::class, 'taoHoiDong'])->name('taoHoiDong');
+        Route::post('/tao-hoi-dong', [baoveluanvan::class, 'taoHoiDong'])->name('taoHoiDong');
         Route::get('/hoidong', [baoveluanvan::class, 'index'])->name('index');
         Route::delete('/delete_hoidong/{MA_HD}', [baoveluanvan::class, 'delete_hd'])->name('delete_hd');
         Route::get('/edit_hoidong/{MA_HD}', [baoveluanvan::class, 'edit_hd'])->name('edit_hd');
@@ -86,16 +85,18 @@ Route::group(['prefix' => 'hoidong', 'as' => 'hoidong.'], function () {
         Route::get('/hoidongshow', [baoveluanvan::class, 'showHoidong'])->name('show');  
         Route::get('/xem-hoi-dong-danh-gia', [baoveluanvan::class, 'showHoiDongDanhGia'])->name('hoidong_danhgia');
        
-        Route::get('/hoidong/in-phieu/{ma_hd}', [baoveluanvan::class, 'inPhieuSinhVien'])->name('in_phieu');
+        Route::get('/hoidong/in-phieu/', [baoveluanvan::class, 'inPhieuSinhVien'])->name('in_phieu');
 
-        Route::get('/hoidong/bien-ban/{ma_hd}', [baoveluanvan::class, 'inBienBanSinhVien'])->name('bien_ban');
+        Route::get('/hoidong/bien-ban/', [baoveluanvan::class, 'inBienBanSinhVien'])->name('bien_ban');
         Route::delete('/hoidong/delete-all', [baoveluanvan::class, 'deleteAll'])->name('delete_all');
 
         Route::get('/add-hoidong',[baoveluanvan::class,'addhoidong'])->name('add_hoidong');
         Route::post('/save-hoidong', [baoveluanvan::class, 'savehoidong'])->name('save_hoidong');
-
-
+        Route::get('/create_hd',[baoveluanvan::class,'create_hoidong'])->name('create_hoidong');
         Route::get('/hoidong/danh-gia/{ma_hd}',[baoveluanvan::class, 'inPhieuDanhGia'])->name('danh_gia');
+        ///Lọc hội đồng
+        Route::get('/hoidong/filter', [baoveluanvan::class, 'filterHoiDong'])->name('filter');
+
     });
     
 Route::group(['prefix'=>'lichbaove','as'=>'lichbaove.'],function(){

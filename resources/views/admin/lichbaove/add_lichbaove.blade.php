@@ -1,6 +1,12 @@
 @extends('admin-layout')
 
 @section('admin_content')
+<style>
+.card {
+        max-width: 800px;
+        margin: auto;
+}
+</style>
 <div class="container mt-5">
         <div class="card">
                 <div class="card-header bg-primary text-white d-flex align-items-center justify-content-center"
@@ -31,7 +37,8 @@
                                 <div class="row">
                                         <div class="form-group col-md-6">
                                                 <label for="NGAY_BV">Ngày Bảo Vệ</label>
-                                                <input type="date" name="NGAY_BV" class="form-control">
+                                                <input type="date" min="<?= date('Y-m-d') ?>" name="NGAY_BV"
+                                                        class="form-control">
                                         </div>
                                         <div class="form-group col-md-6">
                                                 <label for="GIO_BATDAU_BV">Giờ Bắt Đầu</label>

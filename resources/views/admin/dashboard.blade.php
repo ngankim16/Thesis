@@ -240,7 +240,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 .today {
 
-        background-color: black;
         font-weight: bold;
         border-radius: 50%;
         width: 20px;

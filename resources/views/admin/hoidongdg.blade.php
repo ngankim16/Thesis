@@ -88,11 +88,12 @@
         <h3 class="text-center sub-title">Bộ môn: HỆ THỐNG THÔNG TIN</h3>
         <p class="text-center document-subtitle">(Kèm theo quyết định số ... /QĐ-CNTT&TT ngày .../.../...)</p>
         <p><strong>Ghi chú:</strong> Vai trò các thành viên Hội đồng: (1) Chủ tịch, (2) Ủy viên, (3) Thư ký</p>
-
         @if($hoiDongs->isNotEmpty())
         @php
         $globalIndex = 1;
-        $groupedHoidongs = $hoiDongs->groupBy(function($item) {
+        // Sắp xếp theo ngày, phòng và giờ bắt đầu
+        $groupedHoidongs = $hoiDongs->sortBy(['NGAY_BV', 'TEN_PH',
+        'GIO_BAT_DAU'])->groupBy(function($item) {
         return $item->NGAY_BV . ',' . $item->TEN_PH;
         });
         @endphp
@@ -105,6 +106,7 @@
         return $hoiDong->sinhViens;
         })->count();
         @endphp
+
 
         <div class="mb-3">
                 <p><strong>Ngày:</strong> {{ $ngay }} – <strong>Phòng:</strong> {{ $phong }} – <strong>Tổng số sinh

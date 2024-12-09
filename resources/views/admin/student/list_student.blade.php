@@ -1,12 +1,16 @@
 @extends('admin-layout')
 @section('admin_content')
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
 <div class="col-lg-12">
         <div class="card card-outline">
-                <div class="card-header">
-                        <div class="card-tools">
-                                <a class="btn btn-primary" href="{{route('student.add_st')}}">Add</a>
-                        </div>
+
+
+                <div class="card-tools card-tools text-right">
+                        <a class="btn btn-primary" href="{{route('student.add_st')}}">Add</a>
                 </div>
+
                 <div class="card-body">
                         @if (Session::has('thongbao'))
                         <div class="alert alert-success" id="thongbao">
@@ -22,29 +26,57 @@
                         </script>
 
 
+
+                        <div class="container mt-4">
+                                <form class="d-flex justify-content-start mb-3" method="GET"
+                                        action="{{ route('student.list_st') }}">
+                                        <!-- Năm học -->
+                                        <div class="me-3">
+                                                <label for="nam_hoc" class="form-label">Năm học:</label>
+                                                <select class="form-select form-select-sm" id="nam_hoc" name="nam_hoc"
+                                                        onchange="location = this.value;">
+                                                        <option value="{{ route('student.list_st', ['hoc_ky' => 1, 'nam_hoc' => '2024-2025']) }}"
+                                                                selected>2024</option>
+                                                        <option
+                                                                value="{{ route('student.list_st', ['hoc_ky' => 1, 'nam_hoc' => '2023-2024']) }}">
+                                                                2025</option>
+                                                        <!-- Add more options as needed -->
+                                                </select>
+                                        </div>
+
+                                        <!-- Học kỳ -->
+                                        <div class="me-3">
+                                                <label for="hoc_ky" class="form-label">Học kỳ:</label>
+                                                <select class="form-select form-select-sm" id="hoc_ky" name="hoc_ky"
+                                                        onchange="location = this.value;">
+                                                        <option value="{{ route('student.list_st', ['hoc_ky' => 1, 'nam_hoc' => '2024-2025']) }}"
+                                                                selected>Học kỳ 1</option>
+                                                        <option
+                                                                value="{{ route('student.list_st', ['hoc_ky' => 2, 'nam_hoc' => '2024-2025']) }}">
+                                                                Học kỳ 2</option>
+                                                </select>
+                                        </div>
+
+                                        <!-- Nút Xem (Có thể loại bỏ nếu chỉ sử dụng chọn tự động) -->
+                                        <!-- <button type="submit" class="btn btn-primary btn-sm">Xem</button> -->
+                                </form>
+                        </div>
+
+
                         <div class="table-responsive">
                                 <table class="table  table-striped tabe-hover" id="list">
 
                                         <thead>
                                                 <tr>
                                                         <th class="text-center" style="width: 50px;">#</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột # -->
                                                         <th style="width: 100px;">Mã sv</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột Mã sv -->
                                                         <th style="width: 150px;">Họ tên</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột Họ tên -->
                                                         <th class="ten-de-tai" style="width: 250px;">Tên đề tài</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột Tên đề tài -->
                                                         <th style="width: 150px;">Tên giảng viên</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột Tên giảng viên -->
                                                         <th style="width: 200px;">Email</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột Email -->
-                                                        <th style="width: 120px;">Số điện thoại</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột Số điện thoại -->
                                                         <th style="width: 100px;">Lớp</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột Lớp -->
                                                         <th style="width: 100px;">Action</th>
-                                                        <!-- Điều chỉnh độ rộng cho cột Action -->
+
                                                 </tr>
                                         </thead>
                                         <tbody>
@@ -64,7 +96,6 @@
 
                                                         </td>
                                                         <td><b>{{$sv->EMAIL_SV}}</b></td>
-                                                        <td><b>{{ $sv->SDT_SV	 }}</b></td>
                                                         <td><b>{{ $sv->LOP_SV	}}</b></td>
                                                         <td class="text-center">
                                                                 <div class="btn-group">

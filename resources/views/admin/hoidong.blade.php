@@ -1,32 +1,26 @@
 @extends('admin-layout')
 @section('admin_content')
+
+
+
 <div class="col-lg-12">
         <div class="card card-outline">
                 <a href="{{ route('hoidong.add_hoidong') }}" class="btn btn-info"> Thêm</a>
                 <div class="card-header">
-                        <div class="card-tools">
-                                @if($hoiDongs->isNotEmpty())
-                                <!-- Chỉ cần 1 nút In Phiếu cho tất cả sinh viên trong hội đồng đầu tiên -->
-                                <a href="{{ route('hoidong.in_phieu', $hoiDongs->first()->MA_HD) }}"
-                                        class="btn btn-info" target="_blank">
-                                        Phiếu đánh giá
-                                </a>
-                                <a href="{{ route('hoidong.bien_ban', $hoiDongs->first()->MA_HD) }}"
-                                        class="btn btn-info" target="_blank">Biên bản</a>
-                                @else
-                                <p>Không có hội đồng nào để in phiếu.</p>
-                                @endif
 
-                        </div>
 
-                        <style>
+                        <!-- <style>
                         .card-tools .btn {
                                 margin-top: 70px;
                                 /* Điều chỉnh giá trị theo ý bạn */
                         }
-                        </style>
+                        </style> -->
+
+
                         <div class="container">
-                                <h2 class="text-center" style="margin-bottom: 80px;"> Danh Sách Hội Đồng Đánh Giá</h2>
+                                <h2 class="text-center" style="margin-bottom: 80px; text-align: center;">Danh Sách Hội
+                                        Đồng Đánh Giá</h2>
+
                                 @if (Session::has('thongbao'))
                                 <div class="alert alert-success" id="thongbao">
                                         {{ Session::get('thongbao') }}
@@ -64,6 +58,59 @@
                                         width: max-content;
                                 }
                                 </style>
+                                <div class="card-tools card-tools text-right">
+                                        @if($hoiDongs->isNotEmpty())
+                                        <!-- Chỉ cần 1 nút In Phiếu cho tất cả sinh viên trong hội đồng đầu tiên -->
+                                        <a href="{{ route('hoidong.in_phieu', ['hoc_ky' => request('hoc_ky'), 'nam_hoc' => request('nam_hoc')] ) }}"
+                                                class="btn btn-info" target="_blank">
+                                                <i class="fa fa-print"></i> Phiếu đánh giá
+                                        </a>
+
+
+                                        <a href="{{ route('hoidong.bien_ban', ['hoc_ky' => request('hoc_ky'), 'nam_hoc' => request('nam_hoc')] )}}"
+                                                class="btn btn-info" target="_blank"> <i class="fa fa-print"></i> Biên
+                                                bản</a>
+                                        @else
+                                        <p>Không có hội đồng nào để in phiếu.</p>
+                                        @endif
+
+                                </div>
+                                <div class="container mt-4">
+                                        <form class="d-flex justify-content-start mb-3" method="GET"
+                                                action="{{ route('hoidong.index') }}">
+                                                <!-- Năm học -->
+                                                <div class="me-3">
+                                                        <label for="nam_hoc" class="form-label">Năm học:</label>
+                                                        <select class="form-select form-select-sm" id="nam_hoc"
+                                                                name="nam_hoc" onchange="location = this.value;">
+                                                                <option value="{{ route('hoidong.index', ['hoc_ky' => 1, 'nam_hoc' => '2024-2025']) }}"
+                                                                        selected>2024</option>
+                                                                <option
+                                                                        value="{{ route('hoidong.index', ['hoc_ky' => 1, 'nam_hoc' => '2023-2024']) }}">
+                                                                        2025</option>
+                                                                <!-- Add more options as needed -->
+                                                        </select>
+                                                </div>
+                                                <span class="mx-2"></span>
+                                                <!-- Học kỳ -->
+                                                <div class="me-3">
+                                                        <label for="hoc_ky" class="form-label">Học kỳ:</label>
+                                                        <select class="form-select form-select-sm" id="hoc_ky"
+                                                                name="hoc_ky" onchange="location = this.value;">
+                                                                <option value="{{ route('hoidong.index', ['hoc_ky' => 1, 'nam_hoc' => '2024-2025']) }}"
+                                                                        selected>Học kỳ 1</option>
+                                                                <option
+                                                                        value="{{ route('hoidong.index', ['hoc_ky' => 2, 'nam_hoc' => '2024-2025']) }}">
+                                                                        Học kỳ 2</option>
+                                                        </select>
+                                                </div>
+
+                                                <!-- Nút Xem (Có thể loại bỏ nếu chỉ sử dụng chọn tự động) -->
+                                                <!-- <button type="submit" class="btn btn-primary btn-sm">Xem</button> -->
+                                        </form>
+                                </div>
+
+
 
                                 <table class="table table-striped table-hover table-center" id="list">
                                         <thead>
@@ -179,13 +226,12 @@
                                 </table>
                                 @endif
                         </div>
-                        <a href="{{ route('hoidong.hoidong_danhgia') }}" class="btn btn-info">Xem Danh Sách
-                        </a>
+                        <a href="{{ route('hoidong.hoidong_danhgia', ['hoc_ky' => request('hoc_ky'), 'nam_hoc' => request('nam_hoc')]) }}"
+                                class="btn btn-info"> Xem Danh Sách</a>
 
 
                         <!-- Nút Tạo Hội Đồng -->
-                        <a href="{{ route('hoidong.taoHoiDong') }}" id="createHoiDongButton" class="btn btn-info"
-                                style="width:100px">Tạo</a>
+
                         <a href="javascript:void(0)" class="btn btn-info"
                                 onclick="if(confirm('Bạn có chắc chắn muốn xóa tất cả hội đồng?')) { document.getElementById('delete-all-form').submit(); }"
                                 class="delete delete_parcel">

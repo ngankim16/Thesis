@@ -55,15 +55,6 @@
                                                         </div>
                                                 </div>
 
-                                                <div class="row">
-                                                        <div class="col-sm-6 form-group ">
-                                                                <label for="" class="control-label">Số điện
-                                                                        thoại</label>
-                                                                <input type="text" name="sdt_sv" id=""
-                                                                        class="form-control "
-                                                                        value="{{$sinh_vien->SDT_SV}}" required>
-                                                        </div>
-                                                </div>
 
                                                 <div class="row">
                                                         <div class="col-sm-6 form-group ">
@@ -89,17 +80,24 @@
 
                                                         </div>
                                                 </div>
-                                                <!-- <div class="col-sm-6 form-group">
-                                                        <label for="imageUpload" class="label"
-                                                                style="padding-top=20px;">Upload
-                                                                Hình
-                                                                Ảnh</label>
-                                                        <input type="file" name="avt_sv" id="imageUpload" class="pre"
-                                                                accept="image/*" value="{{$sinh_vien->AVT_SV}}"
-                                                                required>
 
-                                                </div> -->
+                                                <div class="row">
+                                                        <div class="col-sm-6 form-group ">
+                                                                <label for="" class="control-label">Học Kỳ</label>
 
+                                                                <select name="hoc_ky" id="hoc_ky"
+                                                                        class="form-control  select2">
+                                                                        <option value="HK1">Học Kỳ 1</option>
+                                                                        <option value="HK2">Học Kỳ 2</option>
+
+                                                                </select>
+                                                        </div>
+                                                        <div class=" col-sm-6 form-group ">
+                                                                <label for="" class=" control-label">Năm học</label>
+                                                                <input type="nam_hoc" name="nam_hoc" id=""
+                                                                        class="form-control " required>
+                                                        </div>
+                                                </div>
                                         </div>
                                 </div>
                                 <div class="row">

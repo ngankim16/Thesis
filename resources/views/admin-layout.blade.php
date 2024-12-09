@@ -209,7 +209,7 @@
                                                                   <i class="nav-icon fas fa-user-graduate"></i>
                                                                   <p>
                                                                           Sinh viên
-                                                                          <i class="right fas fa-angle-left"></i>
+
                                                                   </p>
                                                           </a>
                                                           <ul class="nav nav-treeview">
@@ -219,6 +219,14 @@
                                                                                   <i
                                                                                           class="fas fa-angle-right nav-icon"></i>
                                                                                   <p>Thêm sinh viên</p>
+                                                                          </a>
+                                                                  </li>
+                                                                  <li class="nav-item">
+                                                                          <a href="{{route('student.up')}}"
+                                                                                  class="nav-link nav-new_staff tree-item">
+                                                                                  <i
+                                                                                          class="fas fa-angle-right nav-icon"></i>
+                                                                                  <p>UpLoad File</p>
                                                                           </a>
                                                                   </li>
                                                                   <li class="nav-item">
@@ -238,7 +246,7 @@
                                                                   <i class="nav-icon fas fa-users"></i>
                                                                   <p>
                                                                           Giảng viên
-                                                                          <i class="right fas fa-angle-left"></i>
+
                                                                   </p>
                                                           </a>
                                                           <ul class="nav nav-treeview">
@@ -261,13 +269,37 @@
                                                           </ul>
                                                   </li>
 
-                                                  <li class="nav-item">
-                                                          <a href="{{route('hoidong.index')}}"
-                                                                  class="nav-link nav-track">
-                                                                  <i class="nav-icon fa fa-chalkboard-teacher"></i>
-                                                                  <p>Hội Đồng Luận Văn</p>
+
+
+                                                  <li class="nav-item dropdown">
+                                                          <a href="#" class="nav-link nav-edit_staff"
+                                                                  id="lichbaoveDropdown" data-toggle="dropdown">
+                                                                  <i class="nav-icon fas fa-calendar-alt"></i>
+                                                                  <p>
+                                                                          Hội đồng luận văn
+
+                                                                  </p>
                                                           </a>
+                                                          <ul class="nav nav-treeview">
+                                                                  <li class="nav-item">
+                                                                          <a href="{{route('hoidong.index')}}"
+                                                                                  class="nav-link nav-new_staff tree-item">
+                                                                                  <i
+                                                                                          class="fas fa-angle-right nav-icon"></i>
+                                                                                  <p>Danh sách hội đồng</p>
+                                                                          </a>
+                                                                  </li>
+                                                                  <li class="nav-item">
+                                                                          <a href="{{route('hoidong.create_hoidong')}}"
+                                                                                  class="nav-link nav-staff_list tree-item">
+                                                                                  <i
+                                                                                          class="fas fa-angle-right nav-icon"></i>
+                                                                                  <p>Tạo</p>
+                                                                          </a>
+                                                                  </li>
+                                                          </ul>
                                                   </li>
+
 
                                                   <li class="nav-item dropdown">
                                                           <a href="#" class="nav-link nav-edit_staff" id="detaiDropdown"
@@ -275,7 +307,7 @@
                                                                   <i class="nav-icon fas fa-book"></i>
                                                                   <p>
                                                                           Đề Tài
-                                                                          <i class="right fas fa-angle-left"></i>
+
                                                                   </p>
                                                           </a>
                                                           <ul class="nav nav-treeview">
@@ -287,14 +319,7 @@
                                                                                   <p>Thêm đề tài</p>
                                                                           </a>
                                                                   </li>
-                                                                  <li class="nav-item">
-                                                                          <a href="{{route('student.up')}}"
-                                                                                  class="nav-link nav-new_staff tree-item">
-                                                                                  <i
-                                                                                          class="fas fa-angle-right nav-icon"></i>
-                                                                                  <p>tài</p>
-                                                                          </a>
-                                                                  </li>
+
                                                                   <li class="nav-item">
                                                                           <a href="{{route('detai.list_dt')}}"
                                                                                   class="nav-link nav-staff_list tree-item">
@@ -312,7 +337,7 @@
                                                                   <i class="nav-icon fas fa-calendar-alt"></i>
                                                                   <p>
                                                                           Lịch Bảo Vệ
-                                                                          <i class="right fas fa-angle-left"></i>
+
                                                                   </p>
                                                           </a>
                                                           <ul class="nav nav-treeview">

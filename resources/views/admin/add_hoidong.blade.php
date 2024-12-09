@@ -1,78 +1,101 @@
 @extends('admin-layout')
 
 @section('admin_content')
-<div class="container py-5">
-        <h2 class="text-center mb-4">Thêm Hội Đồng</h2>
-
-        <form action="{{ route('hoidong.save_hoidong')}}" method="POST" class="form-style">
-                {{ csrf_field() }}
-
-                <div class="row">
-                        <!-- Mã Hội Đồng -->
-
-
-                        <!-- Ngày Tạo -->
-
+<style>
+.card {
+        max-width: 800px;
+        margin: auto;
+}
+</style>
+<div class="container mt-5">
+        <div class="card">
+                <div class="card-header bg-primary text-white d-flex align-items-center justify-content-center"
+                        style="border-top-left-radius: .5rem; border-top-right-radius: .5rem; padding: 1rem; background: #74b9ff;">
+                        <h4 class="mb-0 font-weight-bold">Thêm Lịch Bảo Vệ</h4>
                 </div>
 
-                <div class="row">
-                        <!-- Chủ Tịch Hội Đồng -->
-                        <div class="col-md-6 mb-3">
-                                <label for="CHU_TICH_HD">Chủ Tịch Hội Đồng</label>
-                                <select class="form-control select2" id="CHU_TICH_HD" name="CHU_TICH_HD">
-                                        <option value="">-- Chọn giảng viên --</option>
-                                        @foreach ($giangViens as $giangVien)
-                                        <option value="{{ $giangVien->MA_GV }}">{{ $giangVien->HOTEN_GV }}</option>
-                                        @endforeach
-                                </select>
-                        </div>
+                <div class="card-body">
 
-                        <!-- Phó Chủ Tịch Hội Đồng -->
-                        <div class="col-md-6 mb-3">
-                                <label for="PHO_CHU_TICH_HD">Phó Chủ Tịch Hội Đồng</label>
-                                <select class="form-control select2" id="PHO_CHU_TICH_HD" name="PHO_CHU_TICH_HD">
-                                        <option value="">-- Chọn giảng viên --</option>
-                                        @foreach ($giangViens as $giangVien)
-                                        <option value="{{ $giangVien->MA_GV }}">{{ $giangVien->HOTEN_GV }}</option>
-                                        @endforeach
-                                </select>
-                        </div>
+                        <form action="{{ route('hoidong.save_hoidong')}}" method="POST">
+                                {{ csrf_field() }}
+
+                                <div class="row">
+                                        <!-- Mã Hội Đồng -->
+
+
+                                        <!-- Ngày Tạo -->
+
+                                </div>
+
+                                <div class="row">
+                                        <!-- Chủ Tịch Hội Đồng -->
+                                        <div class="col-md-6 mb-3">
+                                                <label for="CHU_TICH_HD">Chủ Tịch Hội Đồng</label>
+                                                <select class="form-control select2" id="CHU_TICH_HD"
+                                                        name="CHU_TICH_HD">
+                                                        <option value="">-- Chọn giảng viên --</option>
+                                                        @foreach ($giangViens as $giangVien)
+                                                        <option value="{{ $giangVien->MA_GV }}">
+                                                                {{ $giangVien->HOTEN_GV }}</option>
+                                                        @endforeach
+                                                </select>
+                                        </div>
+
+                                        <!-- Phó Chủ Tịch Hội Đồng -->
+                                        <div class="col-md-6 mb-3">
+                                                <label for="PHO_CHU_TICH_HD">Phó Chủ Tịch Hội Đồng</label>
+                                                <select class="form-control select2" id="PHO_CHU_TICH_HD"
+                                                        name="PHO_CHU_TICH_HD">
+                                                        <option value="">-- Chọn giảng viên --</option>
+                                                        @foreach ($giangViens as $giangVien)
+                                                        <option value="{{ $giangVien->MA_GV }}">
+                                                                {{ $giangVien->HOTEN_GV }}</option>
+                                                        @endforeach
+                                                </select>
+                                        </div>
+                                </div>
+                                <div class="row">
+                                        <!-- Chủ Tịch Hội Đồng -->
+                                        <div class="col-md-6 mb-3">
+                                                <label for="THUKY_HD">Thư Ký Hội Đồng:</label>
+                                                <select class="form-control select2" id="THUKY_HD" name="THUKY_HD"
+                                                        required>
+                                                        <option value="">-- Chọn giảng viên --</option>
+                                                        @foreach ($giangViens as $giangVien)
+                                                        <option value="{{ $giangVien->MA_GV }}">
+                                                                {{ $giangVien->HOTEN_GV }}</option>
+                                                        @endforeach
+                                                </select>
+                                        </div>
+
+                                </div>
+
+
+                                <!-- Danh sách Sinh Viên Bảo Vệ -->
+                                <div class="row">
+                                        <div class="col-md-12 mb-4">
+                                                <label for="sinhVien">Danh sách sinh viên:</label>
+                                                <select class="form-control" id="sinhVien" name="sinhViens[]" multiple
+                                                        required>
+                                                        @foreach ($sinhViens as $sinhVien)
+                                                        <option value="{{ $sinhVien->MA_DT }}">{{ $sinhVien->HOTEN_SV }}
+                                                                -
+                                                                {{ $sinhVien->TEN_DT }}</option>
+                                                        @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Giữ Ctrl/Cmd để chọn nhiều sinh
+                                                        viên.</small>
+                                        </div>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-custom-primary">Cập Nhật</button>
+                                        <a href="{{ route('hoidong.index') }}" class="btn btn-custom-secondary">Hủy</a>
+                                </div>
+
+                        </form>
                 </div>
-                <div class="row">
-                        <!-- Chủ Tịch Hội Đồng -->
-                        <div class="col-md-6 mb-3">
-                                <label for="THUKY_HD">Thư Ký Hội Đồng:</label>
-                                <select class="form-control select2" id="THUKY_HD" name="THUKY_HD" required>
-                                        <option value="">-- Chọn giảng viên --</option>
-                                        @foreach ($giangViens as $giangVien)
-                                        <option value="{{ $giangVien->MA_GV }}">{{ $giangVien->HOTEN_GV }}</option>
-                                        @endforeach
-                                </select>
-                        </div>
-
-                </div>
-
-
-                <!-- Danh sách Sinh Viên Bảo Vệ -->
-                <div class="row">
-                        <div class="col-md-12 mb-4">
-                                <label for="sinhVien">Danh sách sinh viên:</label>
-                                <select class="form-control" id="sinhVien" name="sinhViens[]" multiple required>
-                                        @foreach ($sinhViens as $sinhVien)
-                                        <option value="{{ $sinhVien->MA_DT }}">{{ $sinhVien->HOTEN_SV }} -
-                                                {{ $sinhVien->TEN_DT }}</option>
-                                        @endforeach
-                                </select>
-                                <small class="form-text text-muted">Giữ Ctrl/Cmd để chọn nhiều sinh viên.</small>
-                        </div>
-                </div>
-
-                <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-custom-primary">Cập Nhật</button>
-                        <a href="{{ route('hoidong.index') }}" class="btn btn-custom-secondary">Hủy</a>
-                </div>
-
-        </form>
+        </div>
 </div>
 
 <script>
@@ -82,16 +105,6 @@ jQuery(document).ready(function($) {
 });
 </script>
 <style>
-/* Style cho form */
-.form-style {
-        background-color: #f9f9f9;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        max-width: 800px;
-        margin: auto;
-}
-
 /* Style cho các nhãn */
 .form-group label {
         font-weight: bold;
