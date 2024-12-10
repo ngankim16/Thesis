@@ -90,158 +90,164 @@ class Student extends Controller
    
 //------Hàm import file word và pdf-----///
    
-        public function import(Request $request)
-        {
-            $request->validate([
-                'file' => 'required|mimes:pdf,docx,doc',
-            ]);
-    
-            $filePath = $request->file('file')->getRealPath();
-            $fileExtension = $request->file('file')->getClientOriginalExtension();
-    
-            try {
-                $cellDataArray = [];
-    
-                if ($fileExtension === 'pdf') {
-                    // Xử lý file PDF
-                    $parser = new Parser();
-                    $pdf = $parser->parseFile($filePath);
-                    $text = $pdf->getText();
-                    $lines = explode("\n", $text);
-    
-                    foreach ($lines as $line) {
-                        $cellDataArray[] = array_map('trim', explode(',', $line));
-                    }
-                } else {
-                    // Xử lý file Word
-                    $phpWord = IOFactory::load($filePath);
-                    $sections = $phpWord->getSections();
-    
-                    foreach ($sections as $section) {
-                        $elements = $section->getElements();
-    
-                        foreach ($elements as $element) {
-                            if ($element instanceof \PhpOffice\PhpWord\Element\Table) {
-                                foreach ($element->getRows() as $rowIndex => $row) {
-                                    if ($rowIndex === 0) continue;
-    
-                                    $cellData = [];
-                                    foreach ($row->getCells() as $cell) {
-                                        $cellText = '';
-                                        foreach ($cell->getElements() as $cellElement) {
-                                            if (method_exists($cellElement, 'getText')) {
-                                                $cellText .= $cellElement->getText() . " ";
-                                            }
-                                        }
-                                        $cellData[] = trim($cellText);
+public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:pdf,docx,doc',
+    ]);
+
+    $filePath = $request->file('file')->getRealPath();
+    $fileExtension = $request->file('file')->getClientOriginalExtension();
+
+    try {
+        $cellDataArray = [];
+
+        if ($fileExtension === 'pdf') {
+            // Xử lý file PDF
+            $parser = new Parser();
+            $pdf = $parser->parseFile($filePath);
+            $text = $pdf->getText();
+            $lines = explode("\n", $text);
+
+            foreach ($lines as $line) {
+                $cellDataArray[] = array_map('trim', explode(',', $line));
+            }
+        } else {
+            // Xử lý file Word
+            $phpWord = IOFactory::load($filePath);
+            $sections = $phpWord->getSections();
+
+            foreach ($sections as $section) {
+                $elements = $section->getElements();
+
+                foreach ($elements as $element) {
+                    if ($element instanceof \PhpOffice\PhpWord\Element\Table) {
+                        foreach ($element->getRows() as $row) {
+                            $cellData = [];
+                            foreach ($row->getCells() as $cell) {
+                                $text = '';
+                                foreach ($cell->getElements() as $cellElement) {
+                                    if (method_exists($cellElement, 'getText')) {
+                                        $text .= $cellElement->getText();
                                     }
-                                    $cellDataArray[] = $cellData;
                                 }
+                                $cellData[] = trim($text);
+                            }
+                            if (!empty($cellData)) {
+                                $cellDataArray[] = $cellData;
                             }
                         }
                     }
                 }
-    
-                DB::beginTransaction();
-                $importedCount = 0;
-                $skippedCount = 0;
-                $errorDetails = [];
-    
-                foreach ($cellDataArray as $cellData) {
-                    if (count($cellData) >= 4) {
-                        try {
-                            $deTai = DB::table('de_tai')
-                                ->where('TEN_DT', $cellData[2])
-                                ->first();
-    
-                            if (!$deTai) {
-                                $lastCode = DB::table('de_tai')
-                                    ->where('MA_DT', 'LIKE', 'DT%')
-                                    ->orderBy('MA_DT', 'desc')
-                                    ->value('MA_DT');
-    
-                                $newCode = $lastCode 
-                                    ? 'DT' . str_pad((int)filter_var($lastCode, FILTER_SANITIZE_NUMBER_INT) + 1, 2, '0', STR_PAD_LEFT)
-                                    : 'DT01';
-    
-                                DB::table('de_tai')->insert([
-                                    'MA_DT' => $newCode,
-                                    'TEN_DT' => $cellData[2],
-                                ]);
-    
-                                $maDeTai = $newCode;
-                            } else {
-                                $maDeTai = $deTai->MA_DT;
-                            }
-    
-                            $tenGV = trim(preg_replace('/\s+/', ' ', $cellData[3]));
-                            $gv = DB::table('giang_vien')
-                                ->where('hoten_gv', 'LIKE', '%' . $tenGV . '%')
-                                ->first();
-    
-                            if (!$gv) {
-                                $skippedCount++;
-                                $errorDetails[] = [
-                                    'type' => 'Giảng viên không tồn tại',
-                                    'data' => $cellData,
-                                    'gv' => $tenGV
-                                ];
-                                Log::warning("Giảng viên không tồn tại: {$tenGV}");
-                                continue;
-                            }
-    
-                            $existingSinhVien = DB::table('sinh_vien')
-                                ->where('MA_SV', $cellData[0])
-                                ->first();
-    
-                            if ($existingSinhVien) {
-                                $skippedCount++;
-                                $errorDetails[] = [
-                                    'type' => 'Sinh viên đã tồn tại',
-                                    'data' => $cellData
-                                ];
-                                Log::warning("Sinh viên đã tồn tại: {$cellData[0]}");
-                                continue;
-                            }
-    
-                            DB::table('sinh_vien')->insert([
-                                'MA_SV' => $cellData[0],
-                                'HOTEN_SV' => $cellData[1],
-                                'MA_GV' => $gv->MA_GV,
-                                'MA_DT' => $maDeTai,
-                            ]);
-    
-                            $importedCount++;
-    
-                        } catch (\Exception $e) {
-                            $skippedCount++;
-                            $errorDetails[] = [
-                                'type' => 'Lỗi xử lý',
-                                'data' => $cellData,
-                                'error' => $e->getMessage()
-                            ];
-                            Log::error("Lỗi xử lý cho sinh viên: {$cellData[0]}, Lỗi: {$e->getMessage()}");
-                        }
-                    }
-                }
-    
-                DB::commit();
-    
-                if (!empty($errorDetails)) {
-                    Log::warning('Các bản ghi bị bỏ qua', $errorDetails);
-                }
-    
-                return redirect()->route('student.list_st')
-                    ->with('success', "Nhập dữ liệu thành công! Đã nhập {$importedCount} bản ghi, bỏ qua {$skippedCount} bản ghi.");
-    
-            } catch (\Exception $e) {
-                DB::rollBack();
-                Log::error('Lỗi import: ' . $e->getMessage());
-                return redirect()->back()
-                    ->with('error', 'Có lỗi xảy ra trong quá trình nhập dữ liệu: ' . $e->getMessage());
             }
         }
-    
+
+        DB::beginTransaction();
+        $importedCount = 0;
+        $skippedCount = 0;
+        $errorDetails = [];
+
+        foreach ($cellDataArray as $cellData) {
+            if (count($cellData) >= 8) { // Đảm bảo đủ cột: MA_SV, HOTEN_SV, TEN_DT, hoten_gv, email_sv, lop_sv, nam_hoc, hoc_ky
+                try {
+                    $deTai = DB::table('de_tai')
+                        ->where('TEN_DT', $cellData[2])
+                        ->first();
+
+                    if (!$deTai) {
+                        $lastCode = DB::table('de_tai')
+                            ->where('MA_DT', 'LIKE', 'DT%')
+                            ->orderBy('MA_DT', 'desc')
+                            ->value('MA_DT');
+
+                        $newCode = $lastCode
+                            ? 'DT' . str_pad((int)filter_var($lastCode, FILTER_SANITIZE_NUMBER_INT) + 1, 2, '0', STR_PAD_LEFT)
+                            : 'DT01';
+
+                        DB::table('de_tai')->insert([
+                            'MA_DT' => $newCode,
+                            'TEN_DT' => $cellData[2],
+                        ]);
+
+                        $maDeTai = $newCode;
+                    } else {
+                        $maDeTai = $deTai->MA_DT;
+                    }
+
+                    $tenGV = trim(preg_replace('/\s+/', ' ', $cellData[3]));
+                    $gv = DB::table('giang_vien')
+                        ->whereRaw("LOWER(REPLACE(hoten_gv, ' ', '')) = ?", [
+                            strtolower(str_replace(' ', '', $tenGV))
+                        ])
+                        ->first();
+
+                    if (!$gv) {
+                        $skippedCount++;
+                        $errorDetails[] = [
+                            'type' => 'Giảng viên không tồn tại',
+                            'data' => $cellData,
+                            'gv' => $tenGV
+                        ];
+                        Log::warning("Giảng viên không tồn tại: {$tenGV}");
+                        continue;
+                    }
+
+                    $existingSinhVien = DB::table('sinh_vien')
+                        ->where('MA_SV', $cellData[0])
+                        ->first();
+
+                    if ($existingSinhVien) {
+                        $skippedCount++;
+                        $errorDetails[] = [
+                            'type' => 'Sinh viên đã tồn tại',
+                            'data' => $cellData
+                        ];
+                        Log::warning("Sinh viên đã tồn tại: {$cellData[0]}");
+                        continue;
+                    }
+
+                    DB::table('sinh_vien')->insert([
+                        'MA_SV' => $cellData[0],
+                        'HOTEN_SV' => $cellData[1],
+                        'EMAIL_SV' => $cellData[4],
+                        'LOP_SV' => $cellData[5],
+                        'NAM_HOC' => $cellData[6],
+                        'HOC_KY' => $cellData[7],
+                        'MA_GV' => $gv->MA_GV,
+                        'MA_DT' => $maDeTai,
+                    ]);
+
+                    $importedCount++;
+
+                } catch (\Exception $e) {
+                    $skippedCount++;
+                    $errorDetails[] = [
+                        'type' => 'Lỗi xử lý',
+                        'data' => $cellData,
+                        'error' => $e->getMessage()
+                    ];
+                    Log::error("Lỗi xử lý cho sinh viên: {$cellData[0]}, Lỗi: {$e->getMessage()}");
+                }
+            }
+        }
+
+        DB::commit();
+
+        if (!empty($errorDetails)) {
+            Log::warning('Các bản ghi bị bỏ qua', $errorDetails);
+        }
+
+        return redirect()->route('student.list_st')
+            ->with('success', "Nhập dữ liệu thành công! Đã nhập {$importedCount} bản ghi, bỏ qua {$skippedCount} bản ghi.");
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Lỗi import: ' . $e->getMessage());
+        return redirect()->back()
+            ->with('error', 'Có lỗi xảy ra trong quá trình nhập dữ liệu: ' . $e->getMessage());
+    }
+}
+
     
     
 public function up()

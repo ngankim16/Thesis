@@ -101,7 +101,7 @@
                                                 @endforeach
                                         </tbody>
                                 </table>
-                                <a href="javascript:void(0)" class="btn btn-info"
+                                <!-- <a href="javascript:void(0)" class="btn btn-info"
                                         onclick="if(confirm('Bạn có chắc chắn muốn xóa tất cả hội đồng?')) { document.getElementById('delete-all-form').submit(); }"
                                         class="delete delete_parcel">
                                         <form id="delete-all-form" action="{{ route('lichbaove.delete_all') }}"
@@ -110,7 +110,7 @@
                                                 @method('DELETE')
                                         </form>
                                         <i class="fas fa-trash"></i>
-                                </a>
+                                </a> -->
 
                         </div>
                 </div>

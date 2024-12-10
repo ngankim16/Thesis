@@ -83,32 +83,37 @@
                                                         <label for="nam_hoc" class="form-label">Năm học:</label>
                                                         <select class="form-select form-select-sm" id="nam_hoc"
                                                                 name="nam_hoc" onchange="location = this.value;">
-                                                                <option value="{{ route('hoidong.index', ['hoc_ky' => 1, 'nam_hoc' => '2024-2025']) }}"
-                                                                        selected>2024</option>
-                                                                <option
-                                                                        value="{{ route('hoidong.index', ['hoc_ky' => 1, 'nam_hoc' => '2023-2024']) }}">
-                                                                        2025</option>
+                                                                <!-- Lấy giá trị hiện tại từ GET -->
+                                                                <option value="{{ route('hoidong.index', ['hoc_ky' => 1, 'nam_hoc' => '2024']) }}"
+                                                                        @if(request()->get('nam_hoc') == '2024')
+                                                                        selected @endif>2024</option>
+                                                                <option value="{{ route('hoidong.index', ['hoc_ky' => 1, 'nam_hoc' => '2025']) }}"
+                                                                        @if(request()->get('nam_hoc') == '2025')
+                                                                        selected @endif>2025</option>
                                                                 <!-- Add more options as needed -->
                                                         </select>
                                                 </div>
+
                                                 <span class="mx-2"></span>
+
                                                 <!-- Học kỳ -->
                                                 <div class="me-3">
                                                         <label for="hoc_ky" class="form-label">Học kỳ:</label>
                                                         <select class="form-select form-select-sm" id="hoc_ky"
                                                                 name="hoc_ky" onchange="location = this.value;">
-                                                                <option value="{{ route('hoidong.index', ['hoc_ky' => 1, 'nam_hoc' => '2024-2025']) }}"
-                                                                        selected>Học kỳ 1</option>
-                                                                <option
-                                                                        value="{{ route('hoidong.index', ['hoc_ky' => 2, 'nam_hoc' => '2024-2025']) }}">
-                                                                        Học kỳ 2</option>
+                                                                <!-- Lấy giá trị hiện tại từ GET -->
+                                                                <option value="{{ route('hoidong.index', ['hoc_ky' => 1, 'nam_hoc' => request()->get('nam_hoc')]) }}"
+                                                                        @if(request()->get('hoc_ky') == 1) selected
+                                                                        @endif>Học kỳ 1</option>
+                                                                <option value="{{ route('hoidong.index', ['hoc_ky' => 2, 'nam_hoc' => request()->get('nam_hoc')]) }}"
+                                                                        @if(request()->get('hoc_ky') == 2) selected
+                                                                        @endif>Học kỳ 2</option>
                                                         </select>
                                                 </div>
 
-                                                <!-- Nút Xem (Có thể loại bỏ nếu chỉ sử dụng chọn tự động) -->
-                                                <!-- <button type="submit" class="btn btn-primary btn-sm">Xem</button> -->
                                         </form>
                                 </div>
+
 
 
 
@@ -231,17 +236,20 @@
 
 
                         <!-- Nút Tạo Hội Đồng -->
-
+                        <!-- 
                         <a href="javascript:void(0)" class="btn btn-info"
-                                onclick="if(confirm('Bạn có chắc chắn muốn xóa tất cả hội đồng?')) { document.getElementById('delete-all-form').submit(); }"
-                                class="delete delete_parcel">
-                                <form id="delete-all-form" action="{{ route('hoidong.delete_all') }}" method="POST"
-                                        style="display: none;">
+                                onclick="if(confirm('Bạn có chắc chắn muốn xóa tất cả hội đồng?')) { document.getElementById('delete-all-form').submit(); }">
+                                <form id="delete-all-form"
+                                        action="{{ route('hoidong.delete_all') }}"
+                                        method="POST" style="display: none;">
                                         @csrf
                                         @method('DELETE')
                                 </form>
                                 <i class="fas fa-trash"></i>
-                        </a>
+                        </a> -->
+
+
+
 
 
                 </div>

@@ -226,7 +226,7 @@
                                                                                   class="nav-link nav-new_staff tree-item">
                                                                                   <i
                                                                                           class="fas fa-angle-right nav-icon"></i>
-                                                                                  <p>UpLoad File</p>
+                                                                                  <p>Import Sinh viên</p>
                                                                           </a>
                                                                   </li>
                                                                   <li class="nav-item">

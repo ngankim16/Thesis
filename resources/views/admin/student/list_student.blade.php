@@ -35,30 +35,34 @@
                                                 <label for="nam_hoc" class="form-label">Năm học:</label>
                                                 <select class="form-select form-select-sm" id="nam_hoc" name="nam_hoc"
                                                         onchange="location = this.value;">
-                                                        <option value="{{ route('student.list_st', ['hoc_ky' => 1, 'nam_hoc' => '2024-2025']) }}"
-                                                                selected>2024</option>
-                                                        <option
-                                                                value="{{ route('student.list_st', ['hoc_ky' => 1, 'nam_hoc' => '2023-2024']) }}">
+                                                        <!-- Kiểm tra giá trị của nam_hoc trong request để giữ trạng thái đã chọn -->
+                                                        <option value="{{ route('student.list_st', ['hoc_ky' => request('hoc_ky', 1), 'nam_hoc' => '2024']) }}"
+                                                                @if(request('nam_hoc')=='2024' ) selected @endif>
+                                                                2024</option>
+                                                        <option value="{{ route('student.list_st', ['hoc_ky' => request('hoc_ky', 1), 'nam_hoc' => '2025']) }}"
+                                                                @if(request('nam_hoc')=='2025' ) selected @endif>
                                                                 2025</option>
-                                                        <!-- Add more options as needed -->
+                                                        <!-- Thêm các tùy chọn năm học nếu cần -->
                                                 </select>
                                         </div>
+
+                                        <span class="mx-2"></span>
 
                                         <!-- Học kỳ -->
                                         <div class="me-3">
                                                 <label for="hoc_ky" class="form-label">Học kỳ:</label>
                                                 <select class="form-select form-select-sm" id="hoc_ky" name="hoc_ky"
                                                         onchange="location = this.value;">
-                                                        <option value="{{ route('student.list_st', ['hoc_ky' => 1, 'nam_hoc' => '2024-2025']) }}"
-                                                                selected>Học kỳ 1</option>
-                                                        <option
-                                                                value="{{ route('student.list_st', ['hoc_ky' => 2, 'nam_hoc' => '2024-2025']) }}">
-                                                                Học kỳ 2</option>
+                                                        <!-- Kiểm tra giá trị của hoc_ky trong request để giữ trạng thái đã chọn -->
+                                                        <option value="{{ route('student.list_st', ['hoc_ky' => 1, 'nam_hoc' => request('nam_hoc', '2024-2025')]) }}"
+                                                                @if(request('hoc_ky')==1) selected @endif>Học kỳ 1
+                                                        </option>
+                                                        <option value="{{ route('student.list_st', ['hoc_ky' => 2, 'nam_hoc' => request('nam_hoc', '2024-2025')]) }}"
+                                                                @if(request('hoc_ky')==2) selected @endif>Học kỳ 2
+                                                        </option>
+                                                        <!-- Thêm các tùy chọn học kỳ nếu cần -->
                                                 </select>
                                         </div>
-
-                                        <!-- Nút Xem (Có thể loại bỏ nếu chỉ sử dụng chọn tự động) -->
-                                        <!-- <button type="submit" class="btn btn-primary btn-sm">Xem</button> -->
                                 </form>
                         </div>
 
@@ -75,6 +79,8 @@
                                                         <th style="width: 150px;">Tên giảng viên</th>
                                                         <th style="width: 200px;">Email</th>
                                                         <th style="width: 100px;">Lớp</th>
+                                                        <th> Năm Học</th>
+                                                        <th>Học Kỳ </th>
                                                         <th style="width: 100px;">Action</th>
 
                                                 </tr>
@@ -97,6 +103,8 @@
                                                         </td>
                                                         <td><b>{{$sv->EMAIL_SV}}</b></td>
                                                         <td><b>{{ $sv->LOP_SV	}}</b></td>
+                                                        <td><b>{{ $sv->Nam_hoc	}}</b></td>
+                                                        <td><b>{{ $sv->Hoc_ky	}}</b></td>
                                                         <td class="text-center">
                                                                 <div class="btn-group">
                                                                         <a href="{{route('student.edit_st',$sv->MA_SV)}}"
